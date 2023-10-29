@@ -13,6 +13,7 @@ class Collectible(po.sprite.Sprite):
         # Specify the path to the directory you want to access
         directory_path = "assets\Sunny-land-files\Graphical Assets\sprites\\" + this.item_type
 
+        # will be used whenever a collectible item will have multiple states ( which is unlikely, atleast right now )
         # # Initialize an empty list to store folder names
         # animation_types = []
 
