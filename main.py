@@ -33,18 +33,6 @@ class HealthBar(Game):
         this.health = health
         this.max_health = max_health
     
-    # def draw(this, health):
-    #     # update health for the health bar
-    #     this.health = health
-        
-    #     # calculate ratio for health
-    #     ratio = this.health / this.max_health
-        
-    #     # draw the health bar based on the ratio
-    #     po.draw.rect(this.game.display, (0, 0, 0), (this.x - 2, this.y - 2, 154, 24))
-    #     po.draw.rect(this.game.display, (255, 0, 0), (this.x, this.y, 150, 20))
-    #     po.draw.rect(this.game.display, (0, 255, 0), (this.x, this.y, 150 * ratio, 20))
-    
     def draw(this, health):
         # update health for the health bar
         this.health = health
@@ -65,7 +53,7 @@ def main():
     # Character( character_type, x-cood, y-cood, speed, run(True, default = False) )
     player = Character('player', 200, 200, 2, 100, True)
     h_bar = HealthBar(10, 10, player.health, player.max_health, game)
-    frog = Character('frog', 400, 205, 1, 75)
+    frog = Character('frog', 400, 205, 3, 75)
     opossum = Character('opossum', 500, 200, 2, 50)
     c.enemy_group.add(frog, opossum)
     
@@ -94,10 +82,12 @@ def main():
         for enemy in c.enemy_group:
             e_hBar = HealthBar(enemy.rect.x, enemy.rect.y - 20, enemy.health, enemy.max_health, game)
             e_hBar.draw(enemy.health)
+            if player.alive:
+                enemy.handle_collision(player)
             if enemy.cType == 'frog':
-                enemy.AI(player, True)
+                enemy.AI(player, game, True)
             else:
-                enemy.AI(player)
+                enemy.AI(player, game)
             enemy.update()
             game.draw(enemy, enemy.flip)
             
@@ -108,9 +98,9 @@ def main():
         player.update()
         po.draw.rect(game.display, (0, 255, 0), player.rect, 1)
         
+        
         if player.alive:    
             player.move()
-            
             # update player action
             if player.shoot:
                 player.shoot(player.isShooting)
@@ -122,11 +112,12 @@ def main():
                 player.update_action(c.CHAR_RUN)
             else:
                 player.update_action(c.CHAR_IDLE)
-        
+                
         # event handling
         for event in po.event.get():
             if event.type == po.QUIT:
                 run = False
+                
             # key presses
             if event.type == po.KEYDOWN:
                 if event.key in (po.K_LEFT, po.K_a):

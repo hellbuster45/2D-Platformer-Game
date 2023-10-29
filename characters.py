@@ -1,5 +1,6 @@
 import pygame as po
 import os
+import random as r
 import constants as c
 from projectiles import Bullet
 
@@ -11,7 +12,8 @@ class Character(po.sprite.Sprite):
         this.alive = True
         this.health = health
         this.max_health = this.health
-        
+        this.invincible = False
+        this.invincible_counter = 0
         this.cType = type
         
         # speed n direction duh!
@@ -27,6 +29,9 @@ class Character(po.sprite.Sprite):
         this.jump = False
         this.y_velocity = 0
         this.inAir = True
+        this.inAir_counter = 0
+        this.isUp = False
+        this.isDown = False
         
         # shoot
         this.isShooting = False
@@ -73,6 +78,9 @@ class Character(po.sprite.Sprite):
         
         # AI variables
         this.move_counter = 0
+        this.idle = False
+        this.idle_counter = 50
+        this.vision = po.Rect(0, 0, 400, 20)
       
     def move(this):
         # Reset movement
@@ -96,9 +104,20 @@ class Character(po.sprite.Sprite):
 
         # jumping
         if this.jump and this.inAir == False:
-            this.y_velocity = -7
+            if this.cType == 'frog':
+                this.y_velocity = -3
+                this.inAir_counter = 5
+                this.isUp = True
+            else:
+                this.y_velocity = -7
+                this.inAir_counter = 23
+                this.isUp = True
             this.jump = False
             this.inAir = True
+        if this.inAir:
+            this.inAir_counter -= 1
+            if this.inAir_counter <= 0:
+                this.isDown = True
         this.y_velocity += c.GRAVITY
         dy += this.y_velocity
         
@@ -106,6 +125,12 @@ class Character(po.sprite.Sprite):
         if this.rect.bottom + dy > 217:
             dy = 217 - this.rect.bottom
             this.inAir = False
+            this.isUp = False
+            this.isDown = False
+            if this.cType == 'frog':
+                this.idle = True
+                this.idle_counter = 50
+                this.update_action(c.CHAR_IDLE)
         
         # Update player's position with floats
         this.rect.x += float(dx)
@@ -114,28 +139,86 @@ class Character(po.sprite.Sprite):
         
     def shoot(this, isShooting):
         if this.isShooting and this.shootCooldown == 0:
-            this.shootCooldown = 15
+            this.shootCooldown = 10
             # spawn a bullet, this.rect.size[0] gives the width of the character sprite
             bullet = Bullet(this.rect.centerx + (0.75 * this.rect.size[0] * this.direction), this.rect.centery, this.direction)
             c.bullet_group.add(bullet)
     
-    def AI(this, char, frog = False):
+    def AI(this, char, game,  frog = False):
         if this.alive and char.alive:
-            if this.direction == 1:
-                this.move_right = True
+            # when enemy is not idle and 4 gets generated randomly, set enemy to idle and idle counter to 50 
+            if this.idle == False and r.randint(1, 200) == 4 and frog == False:
+                this.idle = True
+                this.idle_counter = 50
+                
+            if this.vision.colliderect(char.rect):
+                pass
+
+            # if enemy is not idle, implement movement    
+            if this.idle == False:
+                if this.direction == 1:
+                    this.move_right = True
+                else:
+                    this.move_right = False
+                this.move_left = not this.move_right
+                this.move() 
+                # update enemy vision rectangle along with movement
+                this.vision.center = (this.rect.centerx + 90 * this.direction, this.rect.centery)
+                # po.draw.rect(game.display, (255, 0, 0), this.vision)
+                if frog:
+                    if this.idle:
+                        this.update_action(c.CHAR_IDLE)
+                    else:    
+                        this.update_action(c.CHAR_JUMP)
+                    this.jump = True   
+                else:
+                    this.update_action(c.CHAR_RUN)   
+                this.move_counter += 1
+                if this.move_counter > c.TILE_SIZE:
+                    this.direction *= -1
+                    this.move_counter *= -1
             else:
-                this.move_right = False
-            this.move_left = not this.move_right
-            this.move() 
-            if frog:
-                this.update_action(c.CHAR_JUMP)   
-            else:
-                this.update_action(c.CHAR_RUN)   
-            this.move_counter += 1
-            if this.move_counter > c.TILE_SIZE:
-                this.direction *= -1
-                this.move_counter *= -1
-            
+                # if enemy is idle, decrement the idle counter, when it reaches 0, set enemy to not idle anymore
+                this.idle_counter -= 1
+                if this.idle_counter <= 0:
+                    this.idle = False
+        
+    def handle_collision(this, player):
+        if player.invincible == False:
+            if po.sprite.collide_rect(this, player):
+                print('enemy dealt damage')
+                player.update_action(c.CHAR_HURT)
+                player.health -= 50
+                player.invincible = True
+                player.invincible_counter = 100
+
+                # calculate knockback direction
+                knockback_dir = player.rect.centerx - this.rect.centerx
+                # normalize to -1 or 1
+                if knockback_dir < 0:
+                    knockback_dir = -1
+                else:
+                    knockback_dir = 1
+
+                # calculate knockback direction
+                knockback_dir = player.rect.centerx - this.rect.centerx
+                # normalize to -1 or 1
+                if knockback_dir < 0:
+                    knockback_dir = -1
+                else:
+                    knockback_dir = 1
+
+                # apply knockback
+                player.rect.x += knockback_dir * c.KNOCKBACK_FORCE
+                
+                # reset jump variables
+                player.isUp = False
+                player.isDown = False
+        else:
+            player.invincible_counter -= 1
+            if player.invincible_counter <= 0:
+                player.invincible = False
+        
     def update(this):
         this.update_animation()
         this.check_alive()
@@ -158,23 +241,34 @@ class Character(po.sprite.Sprite):
             
             # again no idea, how this works :/
             this.update_time = po.time.get_ticks()
-            
+
     def update_animation(this): 
-        
         # frame time
         ANIMATION_COOLDOWN = 110
-        # update image with current frame
-        this.image = this.animation_list[this.action][this.frame_index]
         
+        # update image with current frame
+        if this.cType == 'player' or this.cType == 'frog':
+            if this.isUp == True:
+                this.image = this.animation_list[c.CHAR_JUMP][0]
+                if this.isDown == True:
+                    this.image = this.animation_list[c.CHAR_JUMP][1]
+            else:
+                this.image = this.animation_list[this.action][this.frame_index]
+        else:
+            this.image = this.animation_list[this.action][this.frame_index]
+            
         # this is something :/, dunno how this works yet
         if po.time.get_ticks() - this.update_time > ANIMATION_COOLDOWN:
             this.update_time = po.time.get_ticks()
             this.frame_index += 1
+            
         
         # check if index has gone beyond animation_list's length ( looping animation basically )
         if this.frame_index >= len(this.animation_list[this.action]):
             if this.action == c.CHAR_DEATH:
                 this.frame_index = len(this.animation_list[this.action]) - 1
                 this.kill()
+            elif this.action == c.CHAR_HURT:
+                this.frame_index = len(this.animation_list[this.action]) - 1
             else:
                 this.frame_index = 0

@@ -40,13 +40,15 @@ class Bullet(po.sprite.Sprite):
         # delete bullet as soon as it goes off-screen
         if this.rect.right < 0 or this.rect.left > c.SCREEN_WIDTH * 0.6:
             this.kill()
-        
         if group:
             for ch in char:
+                speed = ch.speed
                 if po.sprite.spritecollide(ch, c.bullet_group, 0):
                     if ch.alive:
                         ch.health -= 10
+                        ch.speed = 0
                         this.kill()
+                        ch.speed = speed
         else:
             # bullet hits player
             if po.sprite.spritecollide(char, c.bullet_group, 0):

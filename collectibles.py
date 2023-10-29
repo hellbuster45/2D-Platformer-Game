@@ -55,8 +55,6 @@ class Collectible(po.sprite.Sprite):
         this.update_animation()
         if po.sprite.collide_rect(this, char):
                 if char.alive:
-                    print(f'{char.cType}, {char.health}')
-
                     # update health based on type of cherries
                     if this.item_type == 'super_cherry':
                         char.health += 40
@@ -67,7 +65,6 @@ class Collectible(po.sprite.Sprite):
                     if char.health > char.max_health:
                         char.health = char.max_health
                     print(f'{char.cType}, {char.health}')
-
                     this.kill()
 
     def update_animation(this): 
