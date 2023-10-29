@@ -11,7 +11,7 @@ class Bullet(po.sprite.Sprite):
         bullet_scale = 0.3
         
         # if i want only one bullet sprite
-        img = po.image.load(f'assets\\bullet sprites\Laser Sprites\\3.png').convert_alpha()
+        img = po.image.load(f'python-game\\assets\\bullet sprites\Laser Sprites\\3.png').convert_alpha()
         this.image = po.transform.scale(img, (int(img.get_width() * bullet_scale), int(img.get_height() * bullet_scale)))
         # if i want multiple bullet sprites
         # for i in range(1, 4):
