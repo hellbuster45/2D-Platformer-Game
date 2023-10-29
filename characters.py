@@ -33,7 +33,7 @@ class Character(po.sprite.Sprite):
         this.shootCooldown = 0
 
         # Specify the path to the directory you want to access
-        directory_path = "python-game\\assets\Sunny-land-files\Graphical Assets\sprites\\" + this.cType
+        directory_path = "assets\Sunny-land-files\Graphical Assets\sprites\\" + this.cType
 
         # Initialize an empty list to store folder names
         animation_types = []
@@ -54,19 +54,19 @@ class Character(po.sprite.Sprite):
         this.update_time = po.time.get_ticks()
         this.frame_index = 0
         this.action = 0
-        
+        print(animation_types)
         for animation in animation_types:
             # reset list
             temp_list = []
             
             # count number of sprites
-            num_of_sprites = len(os.listdir(f'python-game\\assets\Sunny-land-files\Graphical Assets\sprites\{this.cType}\{animation}'))
+            num_of_sprites = len(os.listdir(f'assets\Sunny-land-files\Graphical Assets\sprites\{this.cType}\{animation}'))
             
             for i in range(num_of_sprites):
-                this.image = po.image.load(f'python-game\\assets\Sunny-land-files\Graphical Assets\sprites\{this.cType}\{animation}\{animation}-{ i + 1 }.png').convert_alpha()
+                this.image = po.image.load(f'assets\Sunny-land-files\Graphical Assets\sprites\{this.cType}\{animation}\{animation}-{ i + 1 }.png').convert_alpha()
                 temp_list.append(this.image)
             this.animation_list.append(temp_list)
-        this.image = this.animation_list[this.action][this.frame_index]            
+        this.image = this.animation_list[this.action][this.frame_index - 1]            
         
         # image rectangle for collisions n stuff
         this.rect = this.image.get_rect()

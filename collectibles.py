@@ -34,10 +34,10 @@ class Collectible(po.sprite.Sprite):
         this.action = 0
         
         # count number of sprites
-        num_of_sprites = len(os.listdir(f'python-game\\assets\Sunny-land-files\Graphical Assets\sprites\{this.item_type}'))
+        num_of_sprites = len(os.listdir(f'assets\Sunny-land-files\Graphical Assets\sprites\{this.item_type}'))
         
         for i in range(num_of_sprites):
-            this.image = po.image.load(f'python-game\\assets\Sunny-land-files\Graphical Assets\sprites\{this.item_type}\{this.item_type}-{ i + 1 }.png').convert_alpha()
+            this.image = po.image.load(f'assets\Sunny-land-files\Graphical Assets\sprites\{this.item_type}\{this.item_type}-{ i + 1 }.png').convert_alpha()
             if this.item_type == 'super_cherry':
                 this.item_sprites.append(po.transform.scale(this.image, (1.5 * this.image.get_width(), 1.5 * this.image.get_height())))
             else:
