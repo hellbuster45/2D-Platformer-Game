@@ -42,13 +42,12 @@ class Character(po.sprite.Sprite):
         if os.path.exists(directory_path) and os.path.isdir(directory_path):
             # List all items (files and folders) in the specified directory
             items = os.listdir(directory_path)
-
+            
             # Filter out only the folders
             for item in items:
                 item_path = os.path.join(directory_path, item)
                 if os.path.isdir(item_path):
                     animation_types.append(item)
-        
         # storing all sprites in animation_list[]     
         this.animation_list = []
         this.update_time = po.time.get_ticks()
@@ -71,6 +70,9 @@ class Character(po.sprite.Sprite):
         # image rectangle for collisions n stuff
         this.rect = this.image.get_rect()
         this.rect.center = (x, y)
+        
+        # AI variables
+        this.move_counter = 0
       
     def move(this):
         # Reset movement
@@ -117,8 +119,22 @@ class Character(po.sprite.Sprite):
             bullet = Bullet(this.rect.centerx + (0.75 * this.rect.size[0] * this.direction), this.rect.centery, this.direction)
             c.bullet_group.add(bullet)
     
-    def AI(this):
-        pass
+    def AI(this, char, frog = False):
+        if this.alive and char.alive:
+            if this.direction == 1:
+                this.move_right = True
+            else:
+                this.move_right = False
+            this.move_left = not this.move_right
+            this.move() 
+            if frog:
+                this.update_action(c.CHAR_JUMP)   
+            else:
+                this.update_action(c.CHAR_RUN)   
+            this.move_counter += 1
+            if this.move_counter > c.TILE_SIZE:
+                this.direction *= -1
+                this.move_counter *= -1
             
     def update(this):
         this.update_animation()
@@ -147,7 +163,6 @@ class Character(po.sprite.Sprite):
         
         # frame time
         ANIMATION_COOLDOWN = 110
-        
         # update image with current frame
         this.image = this.animation_list[this.action][this.frame_index]
         

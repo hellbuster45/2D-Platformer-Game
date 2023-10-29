@@ -62,19 +62,17 @@ def main():
     # clock for steady fps
     clock = po.time.Clock()
     game = Game()        
-    
     # Character( character_type, x-cood, y-cood, speed, run(True, default = False) )
     player = Character('player', 200, 200, 2, 100, True)
     h_bar = HealthBar(10, 10, player.health, player.max_health, game)
-    frog = Character('frog', 400, 205, 1, 50)
-    c.enemy_group.add(frog)
+    frog = Character('frog', 400, 205, 1, 75)
+    opossum = Character('opossum', 500, 200, 2, 50)
+    c.enemy_group.add(frog, opossum)
     
     # collectibles
     cherry = Collectible('cherry', 300, 110)
-    cherry2= Collectible('cherry', 350, 110)
-    cherry3 = Collectible('cherry', 400, 110)
     s_cherry = Collectible('super_cherry', 250, 110)
-    c.item_group.add(cherry, cherry2, cherry3, s_cherry)
+    c.item_group.add(cherry, s_cherry)
     
     # main loop
     run = True
@@ -96,12 +94,15 @@ def main():
         for enemy in c.enemy_group:
             e_hBar = HealthBar(enemy.rect.x, enemy.rect.y - 20, enemy.health, enemy.max_health, game)
             e_hBar.draw(enemy.health)
-            game.draw(enemy, enemy.flip)
+            if enemy.cType == 'frog':
+                enemy.AI(player, True)
+            else:
+                enemy.AI(player)
             enemy.update()
+            game.draw(enemy, enemy.flip)
             
         # temporary floor
         po.draw.line(game.display, (255, 0, 0), (0, 217), (game.width, 217))
-        
 
         game.draw(player, player.flip)
         player.update()
@@ -122,8 +123,7 @@ def main():
             else:
                 player.update_action(c.CHAR_IDLE)
         
-        frog.move()
-        
+        # event handling
         for event in po.event.get():
             if event.type == po.QUIT:
                 run = False
