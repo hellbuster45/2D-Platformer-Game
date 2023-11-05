@@ -80,7 +80,7 @@ class Character(po.sprite.Sprite):
         this.move_counter = 0
         this.idle = False
         this.idle_counter = 50
-        this.vision = po.Rect(0, 0, 400, 20)
+        this.vision = po.Rect(0, 0, 250, 20)
       
     def move(this):
         # Reset movement
@@ -144,27 +144,31 @@ class Character(po.sprite.Sprite):
             bullet = Bullet(this.rect.centerx + (0.75 * this.rect.size[0] * this.direction), this.rect.centery, this.direction)
             c.bullet_group.add(bullet)
     
-    def AI(this, char, game,  frog = False):
-        if this.alive and char.alive:
+    def AI(this, player, game,  frog = False):
+        
+        if this.alive and player.alive:
+            
             # when enemy is not idle and 4 gets generated randomly, set enemy to idle and idle counter to 50 
-            if this.idle == False and r.randint(1, 200) == 4 and frog == False:
+            if this.idle == False and r.randint(1, 200) == 4 and frog == False and this.vision.colliderect(player.rect) == False:
                 this.idle = True
                 this.idle_counter = 50
-                
-            if this.vision.colliderect(char.rect):
-                pass
 
             # if enemy is not idle, implement movement    
             if this.idle == False:
+                
+                #basic movement
                 if this.direction == 1:
                     this.move_right = True
                 else:
                     this.move_right = False
                 this.move_left = not this.move_right
                 this.move() 
+                
                 # update enemy vision rectangle along with movement
-                this.vision.center = (this.rect.centerx + 90 * this.direction, this.rect.centery)
-                # po.draw.rect(game.display, (255, 0, 0), this.vision)
+                this.vision.center = (this.rect.centerx + 125 * this.direction, this.rect.centery)
+                po.draw.rect(game.display, (255, 0, 0), this.vision)
+                
+                # frog jump movement
                 if frog:
                     if this.idle:
                         this.update_action(c.CHAR_IDLE)
@@ -173,10 +177,22 @@ class Character(po.sprite.Sprite):
                     this.jump = True   
                 else:
                     this.update_action(c.CHAR_RUN)   
-                this.move_counter += 1
-                if this.move_counter > c.TILE_SIZE:
-                    this.direction *= -1
-                    this.move_counter *= -1
+                
+                # if enemy has player in vision, follow it, else, keep patrolling
+                if this.vision.colliderect(player.rect):
+                    this.idle = False
+                    this.idle_counter = 0
+                    if player.move_left:
+                        this.dierection = -1
+                        this.move_left = True
+                    elif player.move_right:
+                        this.dierection = 1
+                        this.move_right = True    
+                else:    
+                    this.move_counter += 1
+                    if this.move_counter > c.TILE_SIZE:
+                        this.direction *= -1
+                        this.move_counter *= -1
             else:
                 # if enemy is idle, decrement the idle counter, when it reaches 0, set enemy to not idle anymore
                 this.idle_counter -= 1

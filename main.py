@@ -21,7 +21,7 @@ class Game:
     
     def draw(this, obj, dir = 1):
         # flip(image, xFlip(true or false), yFlip(True or false))
-        po.draw.rect(this.display, (0, 255, 0), obj.rect, 1)
+        # po.draw.rect(this.display, (0, 255, 0), obj.rect, 1)
         this.display.blit(po.transform.flip(obj.image, dir, False), obj.rect)
         this.screen.blit(po.transform.scale(this.display, this.screen.get_size()), (0, 0))
     
@@ -53,9 +53,9 @@ def main():
     # Character( character_type, x-cood, y-cood, speed, run(True, default = False) )
     player = Character('player', 200, 200, 2, 100, True)
     h_bar = HealthBar(10, 10, player.health, player.max_health, game)
-    frog = Character('frog', 400, 205, 3, 75)
+    # frog = Character('frog', 400, 205, 3, 75)
     opossum = Character('opossum', 500, 200, 2, 50)
-    c.enemy_group.add(frog, opossum)
+    c.enemy_group.add(opossum)
     
     # collectibles
     cherry = Collectible('cherry', 300, 110)
