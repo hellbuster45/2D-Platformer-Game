@@ -1,7 +1,7 @@
 import pygame as po
 
 # game variables
-FPS = 80
+FPS = 75
 GRAVITY = 0.3
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720

@@ -3,4 +3,5 @@
  <image source="../../assets/Sunny-land-files/Graphical Assets/environment/tileset.png" width="400" height="368"/>
  <tile id="180" probability="0.06"/>
  <tile id="182" probability="0.04"/>
+ <tile id="467" probability="0.03"/>
 </tileset>

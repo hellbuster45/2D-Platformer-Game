@@ -2,6 +2,7 @@ import pygame as po
 import os
 import constants as c
 import projectiles
+from pytmx.util_pygame import load_pygame
 from characters import Character
 from collectibles import Collectible
 
@@ -18,6 +19,9 @@ class Game:
         # secondary surface, half of main screen, render everything on this
         this.display = po.Surface((this.width * 0.6, this.height * 0.6))
         
+        # load level data
+        tmx_data = load_pygame('levels\\fulldemo.tmx')
+        print(tmx_data.layers)
     
     def draw(this, obj, dir = 1):
         # flip(image, xFlip(true or false), yFlip(True or false))
