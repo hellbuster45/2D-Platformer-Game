@@ -1,10 +1,9 @@
 import pygame as po
-import os
-import constants as c
-import projectiles
+import game_data as c
 from pytmx.util_pygame import load_pygame
 from characters import Character
 from collectibles import Collectible
+from level import Level
 
 po.init()
 
@@ -17,18 +16,41 @@ class Game:
         po.display.set_caption('lol')
 
         # secondary surface, half of main screen, render everything on this
-        this.display = po.Surface((this.width * 0.6, this.height * 0.6))
+        this.display = po.Surface((this.width, this.height))
         
-        # load level data
-        tmx_data = load_pygame('levels\\fulldemo.tmx')
-        print(tmx_data.layers)
-    
+        # background images
+        this.sky = po.image.load('levels\level1\\background_PNGs\sky.png').convert_alpha()
+        this.mid_front = po.image.load('levels\level1\\background_PNGs\mid_front.png').convert_alpha()
+        this.mid_back = po.image.load('levels\level1\\background_PNGs\mid_back.png').convert_alpha()
+        this.s_width = this.sky.get_width()
+        this.mf_width = this.mid_front.get_width()
+        this.mb_width = this.mid_back.get_width()
+        this.props = po.image.load('levels\level1\\background_PNGs\props.png').convert_alpha()
+        this.caves_background = po.image.load('levels\level1\\background_PNGs\caves_background.png').convert_alpha()
+
     def draw(this, obj, dir = 1):
-        # flip(image, xFlip(true or false), yFlip(True or false))
-        # po.draw.rect(this.display, (0, 255, 0), obj.rect, 1)
         this.display.blit(po.transform.flip(obj.image, dir, False), obj.rect)
         this.screen.blit(po.transform.scale(this.display, this.screen.get_size()), (0, 0))
     
+    def draw_background(this, scroll):
+        # images repeated for parallax effect
+        this.display.blit(this.sky, (0 - (scroll * 0.3), 0))
+        this.display.blit(this.sky, (this.s_width - (scroll * 0.3), 0))
+        this.display.blit(this.mid_back, (0  - (scroll * 0.5), 0))
+        this.display.blit(this.mid_back, (this.mb_width  - (scroll * 0.5), 0))
+        this.display.blit(this.mid_front, (0  - (scroll * 0.7), 0))
+        this.display.blit(this.mid_front, (this.mf_width  - (scroll * 0.7), 0))
+        
+        # only needed once
+        this.display.blit(this.caves_background, (0 - scroll, 0))
+        this.display.blit(this.props, (0 - scroll, 0))
+
+# left for ujjwal :P    
+class MainMenu:
+    def __init__(this):
+        pass
+    
+
 class HealthBar(Game):
     def __init__(this, x, y, health, max_health, game):
         this.x = x
@@ -45,66 +67,80 @@ class HealthBar(Game):
         ratio = this.health / this.max_health
             
         # draw the health bar based on the ratio
-        po.draw.rect(this.game.display, (0, 0, 0), (this.x - 2, this.y - 2, this.game.width * 0.1, 24))
-        po.draw.rect(this.game.display, (255, 0, 0), (this.x, this.y, 35, 5))
-        po.draw.rect(this.game.display, (0, 255, 0), (this.x, this.y, 35 * ratio, 5))
-    
+        po.draw.rect(this.game.display, (0, 0, 0), (this.x - 2, this.y - 2, 54, 14))
+        po.draw.rect(this.game.display, (255, 0, 0), (this.x, this.y, 50, 10))
+        po.draw.rect(this.game.display, (0, 255, 0), (this.x, this.y, 50 * ratio, 10))
+   
 def main():
-    
     # clock for steady fps
     clock = po.time.Clock()
-    game = Game()        
-    # Character( character_type, x-cood, y-cood, speed, run(True, default = False) )
-    player = Character('player', 200, 200, 2, 100, True)
+    game = Game()      
+      
+    # Character( character_type, x-cood, y-cood, speed)
+    player = Character('player', 90, 200, 3, 100)
     h_bar = HealthBar(10, 10, player.health, player.max_health, game)
-    # frog = Character('frog', 400, 205, 3, 75)
-    opossum = Character('opossum', 500, 200, 2, 50)
-    c.enemy_group.add(opossum)
+    frog = Character('frog', 1380, 200, 3, 100)
+    opossum = Character('opossum', 500, 200, 2, 75)
+    c.enemy_group.add(frog, opossum)
     
     # collectibles
     cherry = Collectible('cherry', 300, 110)
     s_cherry = Collectible('super_cherry', 250, 110)
     c.item_group.add(cherry, s_cherry)
     
+    # level and scrolling
+    level = Level('levels\level1\\fulldemo.tmx', game.display, player, scale_factor=1.2)
+    screen_scroll = 0
+    background_scroll = 0
+    
     # main loop
     run = True
     while run:
         clock.tick(c.FPS)
         game.display.fill((0, 0, 0))
+        game.draw_background(background_scroll)
+        level.run(player.alive, screen_scroll)
         h_bar.draw(player.health)
         
-        # draw and update groups
-        for bullet in c.bullet_group:
-            game.draw(bullet, bullet.flip)
-            bullet.update(player)
-            bullet.update(c.enemy_group, True)
-        
-        for item in c.item_group:
-            game.draw(item)
-            item.update(player)
-        
-        for enemy in c.enemy_group:
-            e_hBar = HealthBar(enemy.rect.x, enemy.rect.y - 20, enemy.health, enemy.max_health, game)
-            e_hBar.draw(enemy.health)
-            if player.alive:
-                enemy.handle_collision(player)
-            if enemy.cType == 'frog':
-                enemy.AI(player, game, True)
-            else:
-                enemy.AI(player, game)
-            enemy.update()
-            game.draw(enemy, enemy.flip)
+        if player.alive:
+            # draw and update groups
+            for bullet in c.bullet_group:
+                game.draw(bullet, bullet.flip)
+                bullet.update(c.enemy_group, level, screen_scroll, True)
             
+            for item in c.item_group:
+                game.draw(item)
+                item.update(player, screen_scroll)
+            
+            for enemy in c.enemy_group:
+                e_hBar = HealthBar(enemy.rect.x, enemy.rect.y - 20, enemy.health, enemy.max_health, game)
+                e_hBar.draw(enemy.health)
+                if player.alive:
+                    enemy.handle_collision(player = player, level = level)
+                if enemy.cType == 'frog':
+                    enemy.AI(player, game, level, screen_scroll, background_scroll, True)
+                else:
+                    enemy.AI(player, game, level, screen_scroll, background_scroll)
+                enemy.update()
+                game.draw(enemy, enemy.flip)
+                # to draw enemy hitboxes
+                # po.draw.rect(game.display, (0, 0, 255), enemy.rect, 3)
+                
         # temporary floor
-        po.draw.line(game.display, (255, 0, 0), (0, 217), (game.width, 217))
+        # y_cood = 200
+        # po.draw.line(game.display, (255, 0, 0), (0, y_cood), (5120, y_cood))
 
         game.draw(player, player.flip)
+        po.draw.rect(game.display, (0, 0, 255), player.rect, 3)
         player.update()
-        po.draw.rect(game.display, (0, 255, 0), player.rect, 1)
-        
         
         if player.alive:    
-            player.move()
+            # retrieve the updated screen scroll values from player.move(), 
+            # and also allow player to move 
+            screen_scroll = player.move(game, level, background_scroll)
+            
+            # for scrolling the background images
+            background_scroll -= screen_scroll
             # update player action
             if player.shoot:
                 player.shoot(player.isShooting)
@@ -116,7 +152,7 @@ def main():
                 player.update_action(c.CHAR_RUN)
             else:
                 player.update_action(c.CHAR_IDLE)
-                
+        
         # event handling
         for event in po.event.get():
             if event.type == po.QUIT:
@@ -131,7 +167,7 @@ def main():
                 if event.key in (po.K_x, po.K_LCTRL, po.K_RCTRL):
                     player.isShooting = True
                 if event.key in (po.K_LSHIFT, po.K_RSHIFT):
-                        player.speed = 3   
+                        player.speed = 5
                 if event.key in (po.K_UP, po.K_w, po.K_z) and player.alive == True:
                     player.jump = True                 
                     
@@ -144,10 +180,9 @@ def main():
                 if event.key in (po.K_x, po.K_LCTRL, po.K_RCTRL):
                     player.isShooting = False
                 if event.key in (po.K_LSHIFT, po.K_RSHIFT):
-                        player.speed = 2
+                        player.speed = 3
                 if event.key in (po.K_UP, po.K_w, po.K_z) and player.alive == True:
-                    player.jump = False 
-                
+                    player.jump = False         
         po.display.update()
     po.quit()
 main()

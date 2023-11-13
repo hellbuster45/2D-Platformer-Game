@@ -1,6 +1,6 @@
 import pygame as po
 import os
-import constants as c
+import game_data as c
 # items = {
 #     cherry : for sprite in 
 # }
@@ -51,7 +51,11 @@ class Collectible(po.sprite.Sprite):
         this.rect = this.image.get_rect()
         this.rect.midtop = (x + c.TILE_SIZE // 2, y + (c.TILE_SIZE - this.image.get_height()))
 
-    def update(this, char):
+    def update(this, char, screen_scroll):
+        
+        # scroll the collectibles along with the screen too
+        this.rect.x += screen_scroll
+        
         this.update_animation()
         if po.sprite.collide_rect(this, char):
                 if char.alive:

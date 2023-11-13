@@ -1,11 +1,12 @@
 import pygame as po
 import os
 import random as r
-import constants as c
+import game_data as c
 from projectiles import Bullet
+from level import Level
 
 class Character(po.sprite.Sprite):
-    def __init__(this, type, x, y, speed, health, run = False):
+    def __init__(this, type, x, y, speed, health):
         po.sprite.Sprite.__init__(this)
         
         # no explanation needed beruh -_-
@@ -75,6 +76,8 @@ class Character(po.sprite.Sprite):
         # image rectangle for collisions n stuff
         this.rect = this.image.get_rect()
         this.rect.center = (x, y)
+        this.width = this.image.get_width()
+        this.height = this.image.get_height()
         
         # AI variables
         this.move_counter = 0
@@ -82,11 +85,12 @@ class Character(po.sprite.Sprite):
         this.idle_counter = 50
         this.vision = po.Rect(0, 0, 250, 20)
       
-    def move(this):
+    def move(this, game, level, bg_scroll):
         # Reset movement
         dx = 0
         dy = 0
-
+        screen_scroll = 0
+        
         # movement
         if this.move_left:
             dx = -this.speed
@@ -118,33 +122,84 @@ class Character(po.sprite.Sprite):
             this.inAir_counter -= 1
             if this.inAir_counter <= 0:
                 this.isDown = True
+                this.isUp = False
         this.y_velocity += c.GRAVITY
         dy += this.y_velocity
         
-        # temporary floor collision
-        if this.rect.bottom + dy > 217:
-            dy = 217 - this.rect.bottom
-            this.inAir = False
-            this.isUp = False
-            this.isDown = False
-            if this.cType == 'frog':
-                this.idle = True
-                this.idle_counter = 50
-                this.update_action(c.CHAR_IDLE)
+        if this.y_velocity > 15:
+            this.y_velocity = 0
+        
+        # actual collision with the level tiles
+        for tile in level.layer_sprites.sprites():
+            if tile.collidable_tiles == 'platforms':
+                # Vertical collision
+                if tile.rect.colliderect(this.rect.x, this.rect.y + dy, this.width, this.height):
+                    # If player is jumping inot a tile, bumping it's head
+                    if this.y_velocity < 0:
+                        this.y_velocity = 0
+                        # allow to player to only move the distance of the gap between the tile's bottom and the player's head
+                        dy = tile.rect.bottom - this.rect.top
+                    elif this.y_velocity >= 0:
+                        this.y_velocity = 0
+                        # allow the player to only fall the distance of the gap between the tile's top and the player's feet
+                        dy = tile.rect.top - this.rect.bottom
+                        this.inAir = False
+                        this.isUp = False
+                        this.isDown = False
+                        if this.cType == 'frog':
+                            this.idle = True
+                            this.idle_counter = 50
+                            this.update_action(c.CHAR_IDLE)
+                
+                # Horizontal collision
+                if tile.rect.colliderect(this.rect.x + dx, this.rect.y, this.width, this.height):
+                    if tile.rect.y > this.rect.y:
+                        dx = 0
+                    else:
+                        if this.cType == 'frog' or this.cType == 'opossum':
+                            this.direction *= -1
+                            this.move_counter = 0
+                  
+        # check if player is going off boundaries
+        if this.cType == 'player':
+            if this.rect.left + dx < 0 or this.rect.right + dx > c.SCREEN_WIDTH:
+                dx = 0
+            elif this.rect.left + dx < 0 or this.rect.right + dx > level.level_width:
+                dx = 0
         
         # Update player's position with floats
         this.rect.x += float(dx)
         this.rect.y += float(dy)
+
+        # when a character goes beyond this y value, kill it
+        if this.rect.bottom >= 447:
+            this.health -= 200
         
+        # update screen scrolling
+        if this.cType == 'player':
+            if (this.rect.right > c.SCREEN_WIDTH - (2 * c.SCROLL_THRESHHOLD) and bg_scroll < (level.level_width - c.SCREEN_WIDTH)) or (this.rect.left < c.SCROLL_THRESHHOLD and bg_scroll > abs(dx)):
+                if this.rect.right < level.level_width:
+                   
+                   # dx tells us how much the player will move, 
+                   # when the threshhold is reached, we negate the dx value added to the player, in order to not allow him to move
+                   this.rect.x -= dx
+                   
+                   # instead we move the screen to the opposite direction,
+                   # by the amount the player was gonna move ( dx )
+                   screen_scroll = -dx 
+        
+        return screen_scroll
         
     def shoot(this, isShooting):
         if this.isShooting and this.shootCooldown == 0:
             this.shootCooldown = 10
+            
             # spawn a bullet, this.rect.size[0] gives the width of the character sprite
             bullet = Bullet(this.rect.centerx + (0.75 * this.rect.size[0] * this.direction), this.rect.centery, this.direction)
+            
             c.bullet_group.add(bullet)
     
-    def AI(this, player, game,  frog = False):
+    def AI(this, player, game, level, screen_scroll, bg_scroll, frog = False):
         
         if this.alive and player.alive:
             
@@ -162,11 +217,11 @@ class Character(po.sprite.Sprite):
                 else:
                     this.move_right = False
                 this.move_left = not this.move_right
-                this.move() 
+                this.move(game, level, bg_scroll) 
                 
                 # update enemy vision rectangle along with movement
                 this.vision.center = (this.rect.centerx + 125 * this.direction, this.rect.centery)
-                po.draw.rect(game.display, (255, 0, 0), this.vision)
+                # po.draw.rect(game.display, (255, 0, 0), this.vision)
                 
                 # frog jump movement
                 if frog:
@@ -183,14 +238,14 @@ class Character(po.sprite.Sprite):
                     this.idle = False
                     this.idle_counter = 0
                     if player.move_left:
-                        this.dierection = -1
+                        # this.dierection = -1
                         this.move_left = True
                     elif player.move_right:
-                        this.dierection = 1
+                        # this.dierection = 1
                         this.move_right = True    
                 else:    
                     this.move_counter += 1
-                    if this.move_counter > c.TILE_SIZE:
+                    if this.move_counter > (3 * c.TILE_SIZE):
                         this.direction *= -1
                         this.move_counter *= -1
             else:
@@ -198,8 +253,11 @@ class Character(po.sprite.Sprite):
                 this.idle_counter -= 1
                 if this.idle_counter <= 0:
                     this.idle = False
+            
+            # scroll the enemies along with the screen too..
+            this.rect.x += screen_scroll
         
-    def handle_collision(this, player):
+    def handle_collision(this, level, player):
         if player.invincible == False:
             if po.sprite.collide_rect(this, player):
                 print('enemy dealt damage')
@@ -216,18 +274,10 @@ class Character(po.sprite.Sprite):
                 else:
                     knockback_dir = 1
 
-                # calculate knockback direction
-                knockback_dir = player.rect.centerx - this.rect.centerx
-                # normalize to -1 or 1
-                if knockback_dir < 0:
-                    knockback_dir = -1
-                else:
-                    knockback_dir = 1
-
                 # apply knockback
                 player.rect.x += knockback_dir * c.KNOCKBACK_FORCE
                 
-                # reset jump variables
+                # # reset jump variables
                 player.isUp = False
                 player.isDown = False
         else:
@@ -260,14 +310,14 @@ class Character(po.sprite.Sprite):
 
     def update_animation(this): 
         # frame time
-        ANIMATION_COOLDOWN = 110
+        ANIMATION_COOLDOWN = 90
         
         # update image with current frame
-        if this.cType == 'player' or this.cType == 'frog':
-            if this.isUp == True:
+        if (this.cType == 'player' or this.cType == 'frog') and this.alive == True:
+            if this.isUp == True and this.isDown == False:
                 this.image = this.animation_list[c.CHAR_JUMP][0]
-                if this.isDown == True:
-                    this.image = this.animation_list[c.CHAR_JUMP][1]
+            elif this.isDown == True and this.isUp == False:
+                this.image = this.animation_list[c.CHAR_JUMP][1]
             else:
                 this.image = this.animation_list[this.action][this.frame_index]
         else:
@@ -277,14 +327,11 @@ class Character(po.sprite.Sprite):
         if po.time.get_ticks() - this.update_time > ANIMATION_COOLDOWN:
             this.update_time = po.time.get_ticks()
             this.frame_index += 1
-            
-        
+
         # check if index has gone beyond animation_list's length ( looping animation basically )
         if this.frame_index >= len(this.animation_list[this.action]):
             if this.action == c.CHAR_DEATH:
                 this.frame_index = len(this.animation_list[this.action]) - 1
                 this.kill()
-            elif this.action == c.CHAR_HURT:
-                this.frame_index = len(this.animation_list[this.action]) - 1
             else:
                 this.frame_index = 0
