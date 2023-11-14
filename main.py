@@ -45,10 +45,10 @@ class Game:
         this.display.blit(this.caves_background, (0 - scroll, 0))
         this.display.blit(this.props, (0 - scroll, 0))
 
-# left for ujjwal :P    
+    
 class MainMenu:
     def __init__(this):
-        pass
+        this.start_game = False
     
 
 class HealthBar(Game):
@@ -70,11 +70,20 @@ class HealthBar(Game):
         po.draw.rect(this.game.display, (0, 0, 0), (this.x - 2, this.y - 2, 54, 14))
         po.draw.rect(this.game.display, (255, 0, 0), (this.x, this.y, 50, 10))
         po.draw.rect(this.game.display, (0, 255, 0), (this.x, this.y, 50 * ratio, 10))
+
+# # main menu for the game
+# def main_menu():
+#     menu = MainMenu()
+#     game = Game()
+#     game.display.blit()
+#     if menu.start_game == True:
+#         main(game)
+
    
 def main():
     # clock for steady fps
     clock = po.time.Clock()
-    game = Game()      
+    game = Game()     
       
     # Character( character_type, x-cood, y-cood, speed)
     player = Character('player', 90, 200, 3, 100)

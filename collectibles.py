@@ -14,19 +14,19 @@ class Collectible(po.sprite.Sprite):
         directory_path = "assets\Sunny-land-files\Graphical Assets\sprites\\" + this.item_type
 
         # will be used whenever a collectible item will have multiple states ( which is unlikely, atleast right now )
-        # # Initialize an empty list to store folder names
-        # animation_types = []
+        # Initialize an empty list to store folder names
+        animation_types = []
 
-        # # Check if the directory exists
-        # if os.path.exists(directory_path) and os.path.isdir(directory_path):
-        #     # List all items (files and folders) in the specified directory
-        #     items = os.listdir(directory_path)
+        # Check if the directory exists
+        if os.path.exists(directory_path) and os.path.isdir(directory_path):
+            # List all items (files and folders) in the specified directory
+            items = os.listdir(directory_path)
 
-        #     # Filter out only the folders
-        #     for item in items:
-        #         item_path = os.path.join(directory_path, item)
-        #         if os.path.isdir(item_path):
-        #             animation_types.append(item)
+            # Filter out only the folders
+            for item in items:
+                item_path = os.path.join(directory_path, item)
+                if os.path.isdir(item_path):
+                    animation_types.append(item)
 
         # storing all sprites in animation_list[]     
         this.item_sprites = []
@@ -34,18 +34,23 @@ class Collectible(po.sprite.Sprite):
         this.frame_index = 0
         this.action = 0
 
-        # count number of sprites
-        num_of_sprites = len(os.listdir(f'assets\Sunny-land-files\Graphical Assets\sprites\{this.item_type}'))
+        for animation in animation_types:
+            # reset list
+            temp_list = []
+            
+            # count number of sprites
+            num_of_sprites = len(os.listdir(f'assets\Sunny-land-files\Graphical Assets\sprites\{this.item_type}\{animation}'))
 
-        for i in range(num_of_sprites):
-            this.image = po.image.load(f'assets\Sunny-land-files\Graphical Assets\sprites\{this.item_type}\{this.item_type}-{ i + 1 }.png').convert_alpha()
-            if this.item_type == 'super_cherry':
-                this.item_sprites.append(po.transform.scale(this.image, (1.5 * this.image.get_width(), 1.5 * this.image.get_height())))
-            else:
-                this.item_sprites.append(this.image)        
-        this.items = {}
-        this.items.update({f'{this.item_type}' : this.item_sprites})
-        this.image = this.items[this.item_type][0]  
+            for i in range(num_of_sprites):
+                this.image = po.image.load(f'assets\Sunny-land-files\Graphical Assets\sprites\{this.item_type}\{animation}\{animation}-{ i + 1 }.png').convert_alpha()
+                if this.item_type == 'super_cherry':
+                    temp_list.append(po.transform.scale(this.image, (1.5 * this.image.get_width(), 1.5 * this.image.get_height())))
+                else:
+                    temp_list.append(this.image)
+            print(animation)
+            this.item_sprites.append(temp_list)
+        print(this.item_sprites)
+        this.image = this.item_sprites[this.action][this.frame_index] 
 
         # image rectangle for collisions n stuff
         this.rect = this.image.get_rect()
@@ -61,23 +66,35 @@ class Collectible(po.sprite.Sprite):
                 if char.alive:
                     # update health based on type of cherries
                     if this.item_type == 'super_cherry':
-                        char.health += 40
+                        print('super cherry grabbed')
+                        char.health += 50
+                        this.update_action(1)
                     else:
-                        char.health += 20
+                        print('cherry grabbed')
+                        char.health += 25
+                        this.update_action(1)
 
                     # limit health at 100    
                     if char.health > char.max_health:
                         char.health = char.max_health
                     print(f'{char.cType}, {char.health}')
-                    this.kill()
 
+    def update_action(this, new_action):
+        
+        if new_action != this.action:
+            this.action = new_action
+            this.frame_index = 0    
+            
+            # again no idea, how this works :/
+            this.update_time = po.time.get_ticks()
+    
     def update_animation(this): 
 
         # frame time
         ANIMATION_COOLDOWN = 110
 
         # update image with current frame
-        this.image = this.items[this.item_type][this.frame_index]
+        this.image = this.item_sprites[this.action][this.frame_index]
 
         # this is something :/, dunno how this works yet
         if po.time.get_ticks() - this.update_time > ANIMATION_COOLDOWN:
@@ -85,5 +102,9 @@ class Collectible(po.sprite.Sprite):
             this.frame_index += 1
 
         # check if index has gone beyond animation_list's length ( looping animation basically )
-        if this.frame_index >= len(this.items[this.item_type]):
-            this.frame_index = 0
+        if this.frame_index >= len(this.item_sprites[this.action]):
+            if this.action == 1:
+                this.frame_index = -1
+                this.kill()
+            else:
+                this.frame_index = 0
