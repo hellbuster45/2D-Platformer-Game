@@ -1,7 +1,5 @@
 import pygame as po
-from button import Button
 import game_data as c
-from pytmx.util_pygame import load_pygame
 from characters import Character
 from collectibles import Collectible
 from level import Level
