@@ -47,16 +47,14 @@ class Collectible(po.sprite.Sprite):
                     temp_list.append(po.transform.scale(this.image, (1.5 * this.image.get_width(), 1.5 * this.image.get_height())))
                 else:
                     temp_list.append(this.image)
-            print(animation)
             this.item_sprites.append(temp_list)
-        print(this.item_sprites)
         this.image = this.item_sprites[this.action][this.frame_index] 
 
         # image rectangle for collisions n stuff
         this.rect = this.image.get_rect()
         this.rect.midtop = (x + c.TILE_SIZE // 2, y + (c.TILE_SIZE - this.image.get_height()))
 
-    def update(this, char, screen_scroll):
+    def update(this, char, screen_scroll, item_fx):
         
         # scroll the collectibles along with the screen too
         this.rect.x += screen_scroll
@@ -65,15 +63,16 @@ class Collectible(po.sprite.Sprite):
         if po.sprite.collide_rect(this, char):
                 if char.alive:
                     # update health based on type of cherries
-                    if this.item_type == 'super_cherry':
+                    if this.item_type == 'super_cherry' and this.action != 1:
+                        item_fx.play()
                         print('super cherry grabbed')
                         char.health += 50
                         this.update_action(1)
-                    else:
+                    if this.item_type == 'cherry'and this.action != 1:
+                        item_fx.play()
                         print('cherry grabbed')
                         char.health += 25
                         this.update_action(1)
-
                     # limit health at 100    
                     if char.health > char.max_health:
                         char.health = char.max_health
@@ -105,6 +104,7 @@ class Collectible(po.sprite.Sprite):
         if this.frame_index >= len(this.item_sprites[this.action]):
             if this.action == 1:
                 this.frame_index = -1
+                this.action = 0
                 this.kill()
             else:
                 this.frame_index = 0

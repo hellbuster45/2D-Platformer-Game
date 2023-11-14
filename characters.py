@@ -113,8 +113,9 @@ class Character(po.sprite.Sprite):
                 this.inAir_counter = 5
                 this.isUp = True
             else:
+                game.jump_fx.play()
                 this.y_velocity = -7
-                this.inAir_counter = 23
+                this.inAir_counter = 21
                 this.isUp = True
             this.jump = False
             this.inAir = True
@@ -148,7 +149,7 @@ class Character(po.sprite.Sprite):
                         this.isDown = False
                         if this.cType == 'frog':
                             this.idle = True
-                            this.idle_counter = 50
+                            this.idle_counter = r.randint(50, 60)
                             this.update_action(c.CHAR_IDLE)
                 
                 # Horizontal collision
@@ -172,12 +173,12 @@ class Character(po.sprite.Sprite):
         this.rect.y += float(dy)
 
         # when a character goes beyond this y value, kill it
-        if this.rect.bottom >= 447:
+        if this.rect.bottom >= 536:
             this.health -= 200
         
         # update screen scrolling
         if this.cType == 'player':
-            if (this.rect.right > c.SCREEN_WIDTH - (2 * c.SCROLL_THRESHHOLD) and bg_scroll < (level.level_width - c.SCREEN_WIDTH)) or (this.rect.left < c.SCROLL_THRESHHOLD and bg_scroll > abs(dx)):
+            if (this.rect.right > c.SCREEN_WIDTH - (2 * c.SCROLL_THRESHHOLD) and bg_scroll < ((level.level_width * 1.2) - c.SCREEN_WIDTH)) or (this.rect.left < c.SCROLL_THRESHHOLD and bg_scroll > abs(dx)):
                 if this.rect.right < level.level_width:
                    
                    # dx tells us how much the player will move, 
@@ -190,14 +191,14 @@ class Character(po.sprite.Sprite):
         
         return screen_scroll
         
-    def shoot(this, isShooting):
+    def shoot(this, shoot_fx, isShooting):
         if this.isShooting and this.shootCooldown == 0:
-            this.shootCooldown = 10
+            this.shootCooldown = 2
             
             # spawn a bullet, this.rect.size[0] gives the width of the character sprite
             bullet = Bullet(this.rect.centerx + (0.75 * this.rect.size[0] * this.direction), this.rect.centery, this.direction)
-            
             c.bullet_group.add(bullet)
+            shoot_fx.play()
     
     def AI(this, player, game, level, screen_scroll, bg_scroll, frog = False):
         
@@ -245,7 +246,7 @@ class Character(po.sprite.Sprite):
                         this.move_right = True    
                 else:    
                     this.move_counter += 1
-                    if this.move_counter > (3 * c.TILE_SIZE):
+                    if this.move_counter > (2 * c.TILE_SIZE):
                         this.direction *= -1
                         this.move_counter *= -1
             else:
@@ -285,15 +286,17 @@ class Character(po.sprite.Sprite):
             if player.invincible_counter <= 0:
                 player.invincible = False
         
-    def update(this):
+    def update(this, death_fx = None):
         this.update_animation()
-        this.check_alive()
+        this.check_alive(death_fx)
         # update cooldown    
         if this.shootCooldown > 0:
             this.shootCooldown -= 1
     
-    def check_alive(this):
+    def check_alive(this, death_fx):
         if this.health <= 0:
+            if death_fx != None:
+                death_fx.play()
             this.health = 0
             this.speed = 0
             this.alive = False

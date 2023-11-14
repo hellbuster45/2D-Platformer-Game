@@ -8,7 +8,7 @@ class Bullet(po.sprite.Sprite):
         this.speed = 10
         
         this.bullet_img = []
-        bullet_scale = 0.3
+        bullet_scale = 0.4
         
         # if i want only one bullet sprite
         img = po.image.load(f'assets\\bullet sprites\Laser Sprites\\3.png').convert_alpha()
@@ -32,7 +32,7 @@ class Bullet(po.sprite.Sprite):
         # delete bullet as soon as it goes off-screen
         if this.rect.right < 0 or this.rect.left > c.SCREEN_WIDTH:
             this.kill()
-
+            
         for tile in level.layer_sprites.sprites():
             if tile.rect.colliderect(this.rect):
                 this.kill()
