@@ -314,7 +314,7 @@ class Character(po.sprite.Sprite):
 
     def update_animation(this): 
         # frame time
-        ANIMATION_COOLDOWN = 100
+        ANIMATION_COOLDOWN = 90
             
         # update image with current frame
         if (this.cType == 'player' or this.cType == 'frog') and this.alive == True:
