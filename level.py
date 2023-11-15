@@ -1,5 +1,6 @@
 import pygame as po
 import pytmx
+import game_data as c
 from TilesTMX import TileTMX
 
 def load_map(tmx_data):
@@ -24,8 +25,11 @@ class Level:
         this.level_height = tmx_data.height * tmx_data.tileheight
 
     def draw(this):
+        
         for tile in this.layer_sprites.sprites():
-            this.surface.blit(tile.image, tile.rect)
+            # if (tile.rect.x <= 0 + c.TILE_SIZE and tile.rect.x >= 0 - c.TILE_SIZE) or (tile.rect.x < c.SCREEN_WIDTH + c.TILE_SIZE and tile.rect.x > c.SCREEN_WIDTH - c.TILE_SIZE):
+            if tile.rect.left < c.SCREEN_WIDTH and tile.rect.right > 0:
+                this.surface.blit(tile.image, tile.rect)
             # # Scale the image
             # scaled_image = po.transform.scale(tile.image, (int(tile.rect.width * c.SCALE_FACTOR), int(tile.rect.height * c.SCALE_FACTOR)))
 
