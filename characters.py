@@ -11,9 +11,9 @@ class Character(po.sprite.Sprite):
         
         # no explanation needed beruh -_-
         this.death_fx = po.mixer.Sound('sfx\death.wav')
-        this.death_fx.set_volume(0.1)
+        this.death_fx.set_volume(0.03)
         this.hitHurt_fx = po.mixer.Sound('sfx\hitHurt.wav')
-        this.hitHurt_fx.set_volume(0.2)
+        this.hitHurt_fx.set_volume(0.05)
         this.alive = True
         this.health = health
         this.max_health = this.health
@@ -87,7 +87,7 @@ class Character(po.sprite.Sprite):
         this.move_counter = 0
         this.idle = False
         this.idle_counter = 50
-        this.vision = po.Rect(0, 0, 250, 20)
+        this.vision = po.Rect(0, 0, 250, 10)
       
     def move(this, game, level, bg_scroll):
         # Reset movement
@@ -196,7 +196,7 @@ class Character(po.sprite.Sprite):
         
     def shoot(this, shoot_fx, image, isShooting):
         if this.isShooting and this.shootCooldown == 0:
-            this.shootCooldown = 5
+            this.shootCooldown = 4
             
             # spawn a bullet, this.rect.size[0] gives the width of the character sprite
             bullet = Bullet(this.rect.centerx + (0.75 * this.rect.size[0] * this.direction), this.rect.centery, image, this.direction)
@@ -225,7 +225,7 @@ class Character(po.sprite.Sprite):
                 
                 # update enemy vision rectangle along with movement
                 this.vision.center = (this.rect.centerx + 125 * this.direction, this.rect.centery)
-                # po.draw.rect(game.display, (255, 0, 0), this.vision)
+                po.draw.rect(game.display, (255, 0, 0), this.vision)
                 
                 # frog jump movement
                 if frog:

@@ -45,7 +45,7 @@ class Game:
         # this.caves_background = po.transform.scale(this.caves_background, (int(this.caves_background_rect.width * c.SCALE_FACTOR), int(this.caves_background_rect.height * c.SCALE_FACTOR)))
 
     def draw(this, obj, dir = 1):
-        if obj.rect.x < c.SCREEN_WIDTH:
+        if obj.rect.x < c.SCREEN_WIDTH and obj.rect.x >= 0:
             this.display.blit(po.transform.flip(obj.image, dir, False), obj.rect)
             this.screen.blit(po.transform.scale(this.display, this.screen.get_size()), (0, 0))
     
@@ -68,18 +68,18 @@ class Game:
         this.display.blit(this.props, (0 - scroll, 0))
 
     def music(this):
-        po.mixer.music.load('sfx\Retroland_Recital.mp3')
+        po.mixer.music.load('sfx\C418  - Dog - Minecraft Volume Alpha (320kbps).mp3')
         po.mixer.music.set_volume(0.1)
-        po.mixer.music.play(-1, 0.0, 3000)
+        po.mixer.music.play(-1, 0.0)
         
         this.jump_fx = po.mixer.Sound('sfx\jump.wav')
-        this.jump_fx.set_volume(0.2)
+        this.jump_fx.set_volume(0.1)
         
         this.item_grab_fx = po.mixer.Sound('sfx\item_grab.wav')
-        this.item_grab_fx.set_volume(0.4)
+        this.item_grab_fx.set_volume(0.2)
 
         this.shoot_fx = po.mixer.Sound('sfx\shoot.wav')
-        this.shoot_fx.set_volume(0.4)
+        this.shoot_fx.set_volume(0.2)
         
 class HealthBar(Game):
     def __init__(this, x, y, health, max_health, game):
@@ -158,7 +158,7 @@ def main():
     # main loop
     run = True
     while run:
-        clock.tick(60)
+        clock.tick(70)
         game.draw_background(background_scroll)
         level.run(player.alive, screen_scroll)
         h_bar.draw(player.health)

@@ -4,7 +4,7 @@ import game_data as c
 class Bullet(po.sprite.Sprite):
     def __init__(this, x, y, image, direction):
         po.sprite.Sprite.__init__(this)
-        this.speed = 15
+        this.speed = 25
         this.bullet_img = []
         
         # if i want only one bullet sprite
@@ -43,7 +43,7 @@ class Bullet(po.sprite.Sprite):
                 speed = ch.speed
                 if po.sprite.spritecollide(ch, c.bullet_group, 0):
                     if ch.alive:
-                        ch.health -= 8
+                        ch.health -= 5
                         ch.speed = 0
                         this.kill()
                         ch.speed = speed
