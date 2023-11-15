@@ -22,4 +22,4 @@
   - Youtube: https://www.youtube.com/@CodingWithRuss
 - DaFluffyPotato
   - Youtube: https://www.youtube.com/@DaFluffyPotato,
-for their helpful tutorials regarding Game Development..
+for their helpful tutorials regarding Game Development through PyGame ..
