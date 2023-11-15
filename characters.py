@@ -10,6 +10,8 @@ class Character(po.sprite.Sprite):
         po.sprite.Sprite.__init__(this)
         
         # no explanation needed beruh -_-
+        this.death_fx = po.mixer.Sound('sfx\death.wav')
+        this.death_fx.set_volume(0.05)
         this.alive = True
         this.health = health
         this.max_health = this.health
@@ -132,34 +134,33 @@ class Character(po.sprite.Sprite):
         
         # actual collision with the level tiles
         for tile in level.layer_sprites.sprites():
-            if tile.collidable_tiles == 'platforms':
-                # Vertical collision
-                if tile.rect.colliderect(this.rect.x, this.rect.y + dy, this.width, this.height):
-                    # If player is jumping inot a tile, bumping it's head
-                    if this.y_velocity < 0:
-                        this.y_velocity = 0
-                        # allow to player to only move the distance of the gap between the tile's bottom and the player's head
-                        dy = tile.rect.bottom - this.rect.top
-                    elif this.y_velocity >= 0:
-                        this.y_velocity = 0
-                        # allow the player to only fall the distance of the gap between the tile's top and the player's feet
-                        dy = tile.rect.top - this.rect.bottom
-                        this.inAir = False
-                        this.isUp = False
-                        this.isDown = False
-                        if this.cType == 'frog':
-                            this.idle = True
-                            this.idle_counter = r.randint(50, 60)
-                            this.update_action(c.CHAR_IDLE)
-                
-                # Horizontal collision
-                if tile.rect.colliderect(this.rect.x + dx, this.rect.y, this.width, this.height):
-                    if tile.rect.y > this.rect.y:
-                        dx = 0
-                    else:
-                        if this.cType == 'frog' or this.cType == 'opossum':
-                            this.direction *= -1
-                            this.move_counter = 0
+            # if tile.collidable_tiles == 'platforms':
+            if tile.rect.colliderect(this.rect.x, this.rect.y + dy, this.width, this.height):
+                # If player is jumping inot a tile, bumping it's head
+                if this.y_velocity < 0:
+                    this.y_velocity = 0
+                    # allow to player to only move the distance of the gap between the tile's bottom and the player's head
+                    dy = tile.rect.bottom - this.rect.top
+                elif this.y_velocity >= 0:
+                    this.y_velocity = 0
+                    # allow the player to only fall the distance of the gap between the tile's top and the player's feet
+                    dy = tile.rect.top - this.rect.bottom
+                    this.inAir = False
+                    this.isUp = False
+                    this.isDown = False
+                    if this.cType == 'frog':
+                        this.idle = True
+                        this.idle_counter = r.randint(50, 60)
+                        this.update_action(c.CHAR_IDLE)
+            
+            # Horizontal collision
+            if tile.rect.colliderect(this.rect.x + dx, this.rect.y, this.width, this.height):
+                if tile.rect.y > this.rect.y:
+                    dx = 0
+                else:
+                    if this.cType == 'frog' or this.cType == 'opossum':
+                        this.direction *= -1
+                        this.move_counter = 0
                   
         # check if player is going off boundaries
         if this.cType == 'player':
@@ -173,12 +174,12 @@ class Character(po.sprite.Sprite):
         this.rect.y += float(dy)
 
         # when a character goes beyond this y value, kill it
-        if this.rect.bottom >= 536:
+        if this.rect.bottom >= 447:
             this.health -= 200
         
         # update screen scrolling
         if this.cType == 'player':
-            if (this.rect.right > c.SCREEN_WIDTH - (2 * c.SCROLL_THRESHHOLD) and bg_scroll < ((level.level_width * 1.2) - c.SCREEN_WIDTH)) or (this.rect.left < c.SCROLL_THRESHHOLD and bg_scroll > abs(dx)):
+            if (this.rect.right > c.SCREEN_WIDTH - (2 * c.SCROLL_THRESHHOLD) and bg_scroll < ((level.level_width) - c.SCREEN_WIDTH)) or (this.rect.left < c.SCROLL_THRESHHOLD and bg_scroll > abs(dx)):
                 if this.rect.right < level.level_width:
                    
                    # dx tells us how much the player will move, 
@@ -191,12 +192,12 @@ class Character(po.sprite.Sprite):
         
         return screen_scroll
         
-    def shoot(this, shoot_fx, isShooting):
+    def shoot(this, shoot_fx, image, isShooting):
         if this.isShooting and this.shootCooldown == 0:
-            this.shootCooldown = 2
+            this.shootCooldown = 5
             
             # spawn a bullet, this.rect.size[0] gives the width of the character sprite
-            bullet = Bullet(this.rect.centerx + (0.75 * this.rect.size[0] * this.direction), this.rect.centery, this.direction)
+            bullet = Bullet(this.rect.centerx + (0.75 * this.rect.size[0] * this.direction), this.rect.centery, image, this.direction)
             c.bullet_group.add(bullet)
             shoot_fx.play()
     
@@ -261,7 +262,6 @@ class Character(po.sprite.Sprite):
     def handle_collision(this, level, player):
         if player.invincible == False:
             if po.sprite.collide_rect(this, player):
-                print('enemy dealt damage')
                 player.update_action(c.CHAR_HURT)
                 player.health -= 50
                 player.invincible = True
@@ -286,20 +286,21 @@ class Character(po.sprite.Sprite):
             if player.invincible_counter <= 0:
                 player.invincible = False
         
-    def update(this, death_fx = None):
+    def update(this, ):
         this.update_animation()
-        this.check_alive(death_fx)
+        this.check_alive()
         # update cooldown    
         if this.shootCooldown > 0:
             this.shootCooldown -= 1
     
-    def check_alive(this, death_fx):
+    def check_alive(this):
         if this.health <= 0:
-            if death_fx != None:
-                death_fx.play()
             this.health = 0
             this.speed = 0
             this.alive = False
+            if this.death_fx != None:
+                this.death_fx.play(0)
+            this.death_fx = None
             this.update_action(c.CHAR_DEATH)
 
     def update_action(this, new_action):
@@ -313,8 +314,8 @@ class Character(po.sprite.Sprite):
 
     def update_animation(this): 
         # frame time
-        ANIMATION_COOLDOWN = 90
-        
+        ANIMATION_COOLDOWN = 100
+            
         # update image with current frame
         if (this.cType == 'player' or this.cType == 'frog') and this.alive == True:
             if this.isUp == True and this.isDown == False:

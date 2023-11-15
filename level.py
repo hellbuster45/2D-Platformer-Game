@@ -1,6 +1,5 @@
 import pygame as po
 import pytmx
-import game_data as c
 from TilesTMX import TileTMX
 
 def load_map(tmx_data):
@@ -26,16 +25,16 @@ class Level:
 
     def draw(this):
         for tile in this.layer_sprites.sprites():
-            # this.surface.blit(tile.image, tile.rect)
-            # Scale the image
-            scaled_image = po.transform.scale(tile.image, (int(tile.rect.width * c.SCALE_FACTOR), int(tile.rect.height * c.SCALE_FACTOR)))
+            this.surface.blit(tile.image, tile.rect)
+            # # Scale the image
+            # scaled_image = po.transform.scale(tile.image, (int(tile.rect.width * c.SCALE_FACTOR), int(tile.rect.height * c.SCALE_FACTOR)))
 
-            # Scale and draw the tile
-            # scaled_rect = po.Rect(tile.rect.x * c.SCALE_FACTOR, tile.rect.y * c.SCALE_FACTOR, tile.rect.width * c.SCALE_FACTOR, tile.rect.height * c.SCALE_FACTOR)
-            this.surface.blit(scaled_image, tile.rect)
+            # # Scale and draw the tile
+            # # scaled_rect = po.Rect(tile.rect.x * c.SCALE_FACTOR, tile.rect.y * c.SCALE_FACTOR, tile.rect.width * c.SCALE_FACTOR, tile.rect.height * c.SCALE_FACTOR)
+            # this.surface.blit(scaled_image, tile.rect)
             
-            # draw tile hitboxes
-            # po.draw.rect(this.surface, (0, 255, 0), tile.rect, 1)
+            # # draw tile hitboxes
+            # # po.draw.rect(this.surface, (0, 255, 0), tile.rect, 1)
 
     def run(this, alive, screen_scroll):
         if alive == True:

@@ -1,9 +1,6 @@
 import pygame as po
 import os
 import game_data as c
-# items = {
-#     cherry : for sprite in 
-# }
 
 class Collectible(po.sprite.Sprite):
     def __init__(this, itype, x, y):
@@ -65,18 +62,15 @@ class Collectible(po.sprite.Sprite):
                     # update health based on type of cherries
                     if this.item_type == 'super_cherry' and this.action != 1:
                         item_fx.play()
-                        print('super cherry grabbed')
                         char.health += 50
                         this.update_action(1)
                     if this.item_type == 'cherry'and this.action != 1:
                         item_fx.play()
-                        print('cherry grabbed')
                         char.health += 25
                         this.update_action(1)
                     # limit health at 100    
                     if char.health > char.max_health:
                         char.health = char.max_health
-                    print(f'{char.cType}, {char.health}')
 
     def update_action(this, new_action):
         

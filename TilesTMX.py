@@ -1,6 +1,4 @@
 import pygame as po
-from pytmx.util_pygame import load_pygame
-import game_data as c
 
 class TileTMX(po.sprite.Sprite):
     def __init__(this, pos, surface, groups):
@@ -10,12 +8,12 @@ class TileTMX(po.sprite.Sprite):
         this.collidable_tiles = 'platforms'
         this.original_rect = this.rect.copy()
         
-        this.rect.width = int(this.original_rect.width * c.SCALE_FACTOR)
-        this.rect.height = int(this.original_rect.height * c.SCALE_FACTOR)
-        this.rect.topleft = (
-            int(this.original_rect.topleft[0] * c.SCALE_FACTOR),
-            int(this.original_rect.topleft[1] * c.SCALE_FACTOR)
-        )
+        # this.rect.width = int(this.original_rect.width * c.SCALE_FACTOR)
+        # this.rect.height = int(this.original_rect.height * c.SCALE_FACTOR)
+        # this.rect.topleft = (
+        #     int(this.original_rect.topleft[0] * c.SCALE_FACTOR),
+        #     int(this.original_rect.topleft[1] * c.SCALE_FACTOR)
+        # )
     def update(this, x_offset):
         this.rect.x += x_offset
         

@@ -23,30 +23,31 @@ class Game:
         # background images
         this.sky = po.image.load('levels\level1\\background_PNGs\sky.png').convert_alpha()
         this.sky_rect = this.sky.get_rect()
-        this.sky = po.transform.scale(this.sky, (int(this.sky_rect.width * c.SCALE_FACTOR), int(this.sky_rect.height * c.SCALE_FACTOR)))
+        # this.sky = po.transform.scale(this.sky, (int(this.sky_rect.width * c.SCALE_FACTOR), int(this.sky_rect.height * c.SCALE_FACTOR)))
         this.s_width = this.sky.get_width()
         
         this.mid_front = po.image.load('levels\level1\\background_PNGs\mid_front.png').convert_alpha()
         this.mid_front_rect = this.mid_front.get_rect()
-        this.mid_front = po.transform.scale(this.mid_front, (int(this.mid_front_rect.width * c.SCALE_FACTOR), int(this.mid_front_rect.height * c.SCALE_FACTOR)))
+        # this.mid_front = po.transform.scale(this.mid_front, (int(this.mid_front_rect.width * c.SCALE_FACTOR), int(this.mid_front_rect.height * c.SCALE_FACTOR)))
         this.mf_width = this.mid_front.get_width()
         
         this.mid_back = po.image.load('levels\level1\\background_PNGs\mid_back.png').convert_alpha()
         this.mid_back_rect = this.mid_back.get_rect()
-        this.mid_back = po.transform.scale(this.mid_back, (int(this.mid_back_rect.width * c.SCALE_FACTOR), int(this.mid_back_rect.height * c.SCALE_FACTOR)))
+        # this.mid_back = po.transform.scale(this.mid_back, (int(this.mid_back_rect.width * c.SCALE_FACTOR), int(this.mid_back_rect.height * c.SCALE_FACTOR)))
         this.mb_width = this.mid_back.get_width()
         
         this.props = po.image.load('levels\level1\\background_PNGs\props.png').convert_alpha()
         this.props_rect = this.props.get_rect()
-        this.props = po.transform.scale(this.props, (int(this.props_rect.width * c.SCALE_FACTOR), int(this.props_rect.height * c.SCALE_FACTOR)))
+        # this.props = po.transform.scale(this.props, (int(this.props_rect.width * c.SCALE_FACTOR), int(this.props_rect.height * c.SCALE_FACTOR)))
         
         this.caves_background = po.image.load('levels\level1\\background_PNGs\caves_background.png').convert_alpha()
         this.caves_background_rect = this.caves_background.get_rect()
-        this.caves_background = po.transform.scale(this.caves_background, (int(this.caves_background_rect.width * c.SCALE_FACTOR), int(this.caves_background_rect.height * c.SCALE_FACTOR)))
+        # this.caves_background = po.transform.scale(this.caves_background, (int(this.caves_background_rect.width * c.SCALE_FACTOR), int(this.caves_background_rect.height * c.SCALE_FACTOR)))
 
     def draw(this, obj, dir = 1):
-        this.display.blit(po.transform.flip(obj.image, dir, False), obj.rect)
-        this.screen.blit(po.transform.scale(this.display, this.screen.get_size()), (0, 0))
+        if obj.rect.x < c.SCREEN_WIDTH:
+            this.display.blit(po.transform.flip(obj.image, dir, False), obj.rect)
+            this.screen.blit(po.transform.scale(this.display, this.screen.get_size()), (0, 0))
     
     def menu_background(this):
         this.display.blit(this.sky, (0, 0))
@@ -74,20 +75,14 @@ class Game:
         this.jump_fx = po.mixer.Sound('sfx\jump.wav')
         this.jump_fx.set_volume(0.2)
 
-        this.enemy_jump_fx = po.mixer.Sound('sfx\enemy_jump.wav')
-        this.enemy_jump_fx.set_volume(0.1)
-
         this.hitHurt_fx = po.mixer.Sound('sfx\hitHurt.wav')
-        this.hitHurt_fx.set_volume(0.1)
-
-        this.death_fx = po.mixer.Sound('sfx\death.wav')
-        this.death_fx.set_volume(0.1)
+        this.hitHurt_fx.set_volume(0.2)
         
         this.item_grab_fx = po.mixer.Sound('sfx\item_grab.wav')
-        this.item_grab_fx.set_volume(0.1)
+        this.item_grab_fx.set_volume(0.4)
 
         this.shoot_fx = po.mixer.Sound('sfx\shoot.wav')
-        this.shoot_fx.set_volume(0.1)
+        this.shoot_fx.set_volume(0.4)
         
 class HealthBar(Game):
     def __init__(this, x, y, health, max_health, game):
@@ -118,40 +113,45 @@ def main():
     # Character( character_type, x-cood, y-cood, speed)
     player = Character('player', 110, 180, 3, 100)
     h_bar = HealthBar(10, 10, player.health, player.max_health, game)
-    frog1 = Character('frog', 1392 * c.SCALE_FACTOR, 224 * c.SCALE_FACTOR, 3, 100)
-    frog2 = Character('frog', 2480 * c.SCALE_FACTOR, 336 * c.SCALE_FACTOR, 3, 100)
-    frog3 = Character('frog', 3504 * c.SCALE_FACTOR, 176 * c.SCALE_FACTOR, 3, 100)
-    frog4 = Character('frog', 3792 * c.SCALE_FACTOR, 368 * c.SCALE_FACTOR, 3, 100)
-    frog5 = Character('frog', 5808 * c.SCALE_FACTOR, 352 * c.SCALE_FACTOR, 3, 100)
-    frog6 = Character('frog', 5856 * c.SCALE_FACTOR, 352 * c.SCALE_FACTOR, 3, 100)
-    opossum1 = Character('opossum', 496 * c.SCALE_FACTOR, 208 * c.SCALE_FACTOR, 2, 75)
-    opossum2 = Character('opossum', 1232 * c.SCALE_FACTOR, 304 * c.SCALE_FACTOR, 2, 75)
-    opossum3 = Character('opossum', 1824 * c.SCALE_FACTOR, 304 * c.SCALE_FACTOR, 2, 75)
-    opossum4 = Character('opossum', 2496 * c.SCALE_FACTOR, 336 * c.SCALE_FACTOR, 2, 75)
-    opossum5 = Character('opossum', 3696 * c.SCALE_FACTOR, 272 * c.SCALE_FACTOR, 2, 75)
-    opossum6 = Character('opossum', 3904 * c.SCALE_FACTOR, 288 * c.SCALE_FACTOR, 2, 75)
-    opossum7 = Character('opossum', 4432 * c.SCALE_FACTOR, 288 * c.SCALE_FACTOR, 2, 75)
+    frog1 = Character('frog', 1392, 224, 3, 100)
+    frog2 = Character('frog', 2480, 336, 3, 100)
+    frog3 = Character('frog', 3504, 176, 3, 100)
+    frog4 = Character('frog', 3792, 368, 3, 100)
+    frog5 = Character('frog', 5808, 352, 3, 100)
+    frog6 = Character('frog', 5856, 352, 3, 100)
+    opossum1 = Character('opossum', 496, 208, 2, 75)
+    opossum2 = Character('opossum', 1232, 304, 2, 75)
+    opossum3 = Character('opossum', 1824, 304, 2, 75)
+    opossum4 = Character('opossum', 2496, 336, 2, 75)
+    opossum5 = Character('opossum', 3696, 272, 2, 75)
+    opossum6 = Character('opossum', 3904, 288, 2, 75)
+    opossum7 = Character('opossum', 4432, 288, 2, 75)
     c.enemy_group.add(
         frog1, frog2, frog3, frog4, frog5, frog6,
         opossum1, opossum2, opossum3, opossum4, opossum5, opossum6, opossum7
     )
     
     # collectibles
-    cherry1 = Collectible('cherry', 1184 * c.SCALE_FACTOR, 176 * c.SCALE_FACTOR)
-    cherry2 = Collectible('cherry', 4016 * c.SCALE_FACTOR, 128 * c.SCALE_FACTOR)
-    cherry3 = Collectible('cherry', 4288 * c.SCALE_FACTOR, 240 * c.SCALE_FACTOR)
-    cherry4 = Collectible('cherry', 4416 * c.SCALE_FACTOR, 128 * c.SCALE_FACTOR)
-    cherry5 = Collectible('cherry', 6160 * c.SCALE_FACTOR, 288 * c.SCALE_FACTOR)
-    cherry6 = Collectible('cherry', 6176 * c.SCALE_FACTOR, 288 * c.SCALE_FACTOR)
-    cherry7 = Collectible('cherry', 6192 * c.SCALE_FACTOR, 288 * c.SCALE_FACTOR)
-    cherry8 = Collectible('cherry', 6208 * c.SCALE_FACTOR, 288 * c.SCALE_FACTOR)
-    s_cherry1 = Collectible('super_cherry', 2048 * c.SCALE_FACTOR, 176 * c.SCALE_FACTOR)
-    s_cherry2 = Collectible('super_cherry', 3008 * c.SCALE_FACTOR, 128 * c.SCALE_FACTOR)
-    s_cherry3= Collectible('super_cherry', 5456 * c.SCALE_FACTOR, 192 * c.SCALE_FACTOR)
+    cherry1 = Collectible('cherry', 1184, 176)
+    cherry2 = Collectible('cherry', 4016, 128)
+    cherry3 = Collectible('cherry', 4288, 240)
+    cherry4 = Collectible('cherry', 4416, 128)
+    cherry5 = Collectible('cherry', 6160, 288)
+    cherry6 = Collectible('cherry', 6176, 288)
+    cherry7 = Collectible('cherry', 6192, 288)
+    cherry8 = Collectible('cherry', 6208, 288)
+    s_cherry1 = Collectible('super_cherry', 2048, 176)
+    s_cherry2 = Collectible('super_cherry', 3008, 128)
+    s_cherry3= Collectible('super_cherry', 5456, 192)
     c.item_group.add(
         cherry1, cherry2, cherry3, cherry4, cherry5, cherry6, cherry7, cherry8,
         s_cherry1, s_cherry2, s_cherry3
     )
+    
+    bullet_scale = 0.4
+    img = po.image.load(f'assets\\bullet sprites\Laser Sprites\\3.png').convert_alpha()
+    image = po.transform.scale(img, (int(img.get_width() * bullet_scale), int(img.get_height() * bullet_scale)))
+    
     
     # level and scrolling
     level = Level('levels\level1\\fulldemo.tmx', game.display, player, scale_factor=1.2)
@@ -161,8 +161,7 @@ def main():
     # main loop
     run = True
     while run:
-        clock.tick(75)
-        game.display.fill((0, 0, 0))
+        clock.tick(60)
         game.draw_background(background_scroll)
         level.run(player.alive, screen_scroll)
         h_bar.draw(player.health)
@@ -191,12 +190,12 @@ def main():
                 # po.draw.rect(game.display, (0, 0, 255), enemy.rect, 3)
                 
         # temporary floor
-        y_cood = 383
-        po.draw.line(game.display, (255, 0, 0), (0, y_cood), (5120, y_cood))
+        # y_cood = 447
+        # po.draw.line(game.display, (255, 0, 0), (0, y_cood), (5120, y_cood))
 
         game.draw(player, player.flip)
         po.draw.rect(game.display, (0, 0, 255), player.rect, 3)
-        player.update(game.death_fx)
+        player.update()
         
         if player.alive:    
             # retrieve the updated screen scroll values from player.move(), 
@@ -207,7 +206,7 @@ def main():
             background_scroll -= screen_scroll
             # update player action
             if player.shoot:
-                player.shoot(game.shoot_fx, player.isShooting)
+                player.shoot(game.shoot_fx, image, player.isShooting)
             
             if player.inAir:
                 player.update_action(c.CHAR_JUMP)
