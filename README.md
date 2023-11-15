@@ -1,2 +1,6 @@
 # python-game
-a college project, nothing else
+2D platformer game made in Python
+
+Libraries:
+Pygame
+PyTMX
