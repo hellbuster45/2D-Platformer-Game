@@ -3,7 +3,9 @@
 ***********************
 ### Libraries used:
 - Pygame
+  - https://www.pygame.org/
 - PyTMX
+  - https://github.com/bitcraft/pytmx
 ***********************
 ### Assets used:
   - For bullets:
