@@ -11,7 +11,9 @@ class Character(po.sprite.Sprite):
         
         # no explanation needed beruh -_-
         this.death_fx = po.mixer.Sound('sfx\death.wav')
-        this.death_fx.set_volume(0.05)
+        this.death_fx.set_volume(0.1)
+        this.hitHurt_fx = po.mixer.Sound('sfx\hitHurt.wav')
+        this.hitHurt_fx.set_volume(0.2)
         this.alive = True
         this.health = health
         this.max_health = this.health
@@ -262,7 +264,7 @@ class Character(po.sprite.Sprite):
     def handle_collision(this, level, player):
         if player.invincible == False:
             if po.sprite.collide_rect(this, player):
-                player.update_action(c.CHAR_HURT)
+                player.hitHurt_fx.play()
                 player.health -= 50
                 player.invincible = True
                 player.invincible_counter = 100

@@ -74,9 +74,6 @@ class Game:
         
         this.jump_fx = po.mixer.Sound('sfx\jump.wav')
         this.jump_fx.set_volume(0.2)
-
-        this.hitHurt_fx = po.mixer.Sound('sfx\hitHurt.wav')
-        this.hitHurt_fx.set_volume(0.2)
         
         this.item_grab_fx = po.mixer.Sound('sfx\item_grab.wav')
         this.item_grab_fx.set_volume(0.4)
