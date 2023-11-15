@@ -225,7 +225,7 @@ class Character(po.sprite.Sprite):
                 
                 # update enemy vision rectangle along with movement
                 this.vision.center = (this.rect.centerx + 125 * this.direction, this.rect.centery)
-                po.draw.rect(game.display, (255, 0, 0), this.vision)
+                # po.draw.rect(game.display, (255, 0, 0), this.vision)
                 
                 # frog jump movement
                 if frog:
