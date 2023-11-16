@@ -1,5 +1,6 @@
 import pygame as po
 import game_data as c
+from menu import MainMenu
 from characters import Character
 from collectibles import Collectible
 from level import Level
@@ -18,6 +19,8 @@ class Game:
 
         # secondary surface, half of main screen, render everything on this
         this.display = po.Surface((this.width, this.height))
+        
+        this.musicPlaying = False
         
         # background images
         this.sky = po.image.load('levels\level1\\background_PNGs\sky.png').convert_alpha()
@@ -60,10 +63,6 @@ class Game:
 
     # load and play background music, and load sound effects
     def music(this):
-        po.mixer.music.load('sfx\C418  - Dog - Minecraft Volume Alpha (320kbps).mp3')
-        po.mixer.music.set_volume(0.1)
-        po.mixer.music.play(-1, 0.0)
-        
         this.jump_fx = po.mixer.Sound('sfx\jump.wav')
         this.jump_fx.set_volume(0.1)
         
@@ -99,7 +98,7 @@ def main():
     clock = po.time.Clock()
     game = Game()     
     game.music()
-    
+    menu = MainMenu(game.screen)
     # Character( character_type, x-cood, y-cood, speed)
     player = Character('player', 110, 180, 3, 100)
     h_bar = HealthBar(10, 10, player.health, player.max_health, game)
@@ -151,60 +150,79 @@ def main():
     run = True
     while run:
         clock.tick(70)
-        game.draw_background(background_scroll)
-        level.run(player.alive, screen_scroll)
-        h_bar.draw(player.health)
-        if player.alive:
-            # draw and update groups
-            for bullet in c.bullet_group:
-                game.draw(bullet, bullet.flip)
-                bullet.update(c.enemy_group, level, screen_scroll, True)
-            
-            for item in c.item_group:
-                game.draw(item)
-                item.update(player, screen_scroll, game.item_grab_fx)
-            
-            for enemy in c.enemy_group:
-                e_hBar = HealthBar(enemy.rect.x, enemy.rect.y - 20, enemy.health, enemy.max_health, game)
-                e_hBar.draw(enemy.health)
-                if player.alive:
-                    enemy.handle_collision(player = player, level = level)
-                if enemy.cType == 'frog':
-                    enemy.AI(player, game, level, screen_scroll, background_scroll, True)
-                else:
-                    enemy.AI(player, game, level, screen_scroll, background_scroll)
-                enemy.update()
-                game.draw(enemy, enemy.flip)
-
-        game.draw(player, player.flip)
-        po.draw.rect(game.display, (0, 0, 255), player.rect, 3)
-        player.update()
-        
-        # player actions performed only when player is alive
-        if player.alive:    
-            # retrieve the updated screen scroll values from player.move(), 
-            # and also allow player to move 
-            screen_scroll = player.move(game, level, background_scroll)
-
-            # for scrolling the background images
-            background_scroll -= screen_scroll
-            # update player action
-            if player.shoot:
-                player.shoot(game.shoot_fx, image, player.isShooting)
-            
-            if player.inAir:
-                player.update_action(c.CHAR_JUMP)
-                
-            if player.move_left or player.move_right:
-                player.update_action(c.CHAR_RUN)
+        if menu.start_game == False:
+            if not menu.musicPlaying: 
+                po.mixer.music.load('sfx\Final Fantasy 3 - Cute Little Tozas.mp3')
+                po.mixer.music.set_volume(0.1)
+                po.mixer.music.play(-1, 0.0)
+                menu.musicPlaying = True
+            if menu.show_credits_screen:
+                menu.draw_credits()
             else:
-                player.update_action(c.CHAR_IDLE)
+                menu.draw_menu()
+        else:
+            if not game.musicPlaying:
+                po.mixer.music.load('sfx\C418  - Dog - Minecraft Volume Alpha (320kbps).mp3')
+                po.mixer.music.set_volume(0.1)
+                po.mixer.music.play(-1, 0.0)
+                game.musicPlaying = True
+            game.draw_background(background_scroll)
+            level.run(player.alive, screen_scroll)
+            h_bar.draw(player.health)
+            if player.alive:
+                # draw and update groups
+                for bullet in c.bullet_group:
+                    game.draw(bullet, bullet.flip)
+                    bullet.update(c.enemy_group, level, screen_scroll, True)
+                
+                for item in c.item_group:
+                    game.draw(item)
+                    item.update(player, screen_scroll, game.item_grab_fx)
+                
+                for enemy in c.enemy_group:
+                    e_hBar = HealthBar(enemy.rect.x, enemy.rect.y - 20, enemy.health, enemy.max_health, game)
+                    e_hBar.draw(enemy.health)
+                    if player.alive:
+                        enemy.handle_collision(player = player, level = level)
+                    if enemy.cType == 'frog':
+                        enemy.AI(player, game, level, screen_scroll, background_scroll, True)
+                    else:
+                        enemy.AI(player, game, level, screen_scroll, background_scroll)
+                    enemy.update()
+                    game.draw(enemy, enemy.flip)
+
+            game.draw(player, player.flip)
+            po.draw.rect(game.display, (0, 0, 255), player.rect, 3)
+            player.update()
+            
+            # player actions performed only when player is alive
+            if player.alive:    
+                # retrieve the updated screen scroll values from player.move(), 
+                # and also allow player to move 
+                screen_scroll = player.move(game, level, background_scroll)
+
+                # for scrolling the background images
+                background_scroll -= screen_scroll
+                # update player action
+                if player.shoot:
+                    player.shoot(game.shoot_fx, image, player.isShooting)
+                
+                if player.inAir:
+                    player.update_action(c.CHAR_JUMP)
+                    
+                if player.move_left or player.move_right:
+                    player.update_action(c.CHAR_RUN)
+                else:
+                    player.update_action(c.CHAR_IDLE)
     
         # event handling
         for event in po.event.get():
             if event.type == po.QUIT:
                 run = False
-                
+            if event.type == po.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    menu.handle_click(po.mouse.get_pos())
+            
             # key presses
             if event.type == po.KEYDOWN:
                 if event.key in (po.K_LEFT, po.K_a):
