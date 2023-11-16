@@ -43,7 +43,7 @@ class Bullet(po.sprite.Sprite):
                 speed = ch.speed
                 if po.sprite.spritecollide(ch, c.bullet_group, 0):
                     if ch.alive:
-                        ch.health -= 5
+                        ch.health -= 8
                         ch.speed = 0
                         this.kill()
                         ch.speed = speed
