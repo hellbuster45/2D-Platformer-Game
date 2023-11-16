@@ -73,7 +73,6 @@ class Collectible(po.sprite.Sprite):
                         char.health = char.max_health
 
     def update_action(this, new_action):
-        
         if new_action != this.action:
             this.action = new_action
             this.frame_index = 0    
@@ -82,7 +81,6 @@ class Collectible(po.sprite.Sprite):
             this.update_time = po.time.get_ticks()
     
     def update_animation(this): 
-
         # frame time
         ANIMATION_COOLDOWN = 110
 

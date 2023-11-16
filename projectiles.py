@@ -47,11 +47,3 @@ class Bullet(po.sprite.Sprite):
                         ch.speed = 0
                         this.kill()
                         ch.speed = speed
-        # else:
-        #     pass
-        #     # # bullet hits player
-        #     # if po.sprite.spritecollide(char, c.bullet_group, 0):
-        #     #     if char.alive:
-        #     #         char.health -= 25
-        #     #         print(f'char: {char.cType}, Health: {char.health}')
-        #     #         this.kill()

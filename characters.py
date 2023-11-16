@@ -3,13 +3,11 @@ import os
 import random as r
 import game_data as c
 from projectiles import Bullet
-from level import Level
 
 class Character(po.sprite.Sprite):
     def __init__(this, type, x, y, speed, health):
         po.sprite.Sprite.__init__(this)
         
-        # no explanation needed beruh -_-
         this.death_fx = po.mixer.Sound('sfx\death.wav')
         this.death_fx.set_volume(0.03)
         this.hitHurt_fx = po.mixer.Sound('sfx\hitHurt.wav')
@@ -33,6 +31,8 @@ class Character(po.sprite.Sprite):
         # jump
         this.jump = False
         this.y_velocity = 0
+        
+        # these are made for the purpose of playing the 2 jumping sprite frames at the right time
         this.inAir = True
         this.inAir_counter = 0
         this.isUp = False
@@ -91,7 +91,9 @@ class Character(po.sprite.Sprite):
       
     def move(this, game, level, bg_scroll):
         # Reset movement
+        # dx tells us how much the player will move in x-direction, 
         dx = 0
+        # dy tells us how much the player will move in y-direction, 
         dy = 0
         screen_scroll = 0
         
@@ -111,10 +113,14 @@ class Character(po.sprite.Sprite):
             this.flip = False
 
         # jumping
+        # player can only jump when this.jump is True and if player is not in air ( checked by this.inAir )
         if this.jump and this.inAir == False:
+            # set different jump height for frogs and player
             if this.cType == 'frog':
                 this.y_velocity = -3
                 this.inAir_counter = 5
+                
+                # to play the jump up frame
                 this.isUp = True
             else:
                 game.jump_fx.play()
@@ -123,11 +129,15 @@ class Character(po.sprite.Sprite):
                 this.isUp = True
             this.jump = False
             this.inAir = True
+        
+        # if player is in Air, decrease this.inAir counter and set this.isDown = True ( player is falling down )
         if this.inAir:
             this.inAir_counter -= 1
             if this.inAir_counter <= 0:
+                # to play the fall down frame
                 this.isDown = True
                 this.isUp = False
+                
         this.y_velocity += c.GRAVITY
         dy += this.y_velocity
         
@@ -136,15 +146,16 @@ class Character(po.sprite.Sprite):
         
         # actual collision with the level tiles
         for tile in level.layer_sprites.sprites():
-            # if tile.collidable_tiles == 'platforms':
             if tile.rect.colliderect(this.rect.x, this.rect.y + dy, this.width, this.height):
                 # If player is jumping inot a tile, bumping it's head
                 if this.y_velocity < 0:
                     this.y_velocity = 0
+                    
                     # allow to player to only move the distance of the gap between the tile's bottom and the player's head
                     dy = tile.rect.bottom - this.rect.top
                 elif this.y_velocity >= 0:
                     this.y_velocity = 0
+                    
                     # allow the player to only fall the distance of the gap between the tile's top and the player's feet
                     dy = tile.rect.top - this.rect.bottom
                     this.inAir = False
@@ -184,7 +195,6 @@ class Character(po.sprite.Sprite):
             if (this.rect.right > c.SCREEN_WIDTH - (2 * c.SCROLL_THRESHHOLD) and bg_scroll < ((level.level_width) - c.SCREEN_WIDTH)) or (this.rect.left < c.SCROLL_THRESHHOLD and bg_scroll > abs(dx)):
                 if this.rect.right < level.level_width:
                    
-                   # dx tells us how much the player will move, 
                    # when the threshhold is reached, we negate the dx value added to the player, in order to not allow him to move
                    this.rect.x -= dx
                    
@@ -196,15 +206,17 @@ class Character(po.sprite.Sprite):
         
     def shoot(this, shoot_fx, image, isShooting):
         if this.isShooting and this.shootCooldown == 0:
+            # cooldown after which another bullet can be shot
             this.shootCooldown = 4
             
             # spawn a bullet, this.rect.size[0] gives the width of the character sprite
             bullet = Bullet(this.rect.centerx + (0.75 * this.rect.size[0] * this.direction), this.rect.centery, image, this.direction)
             c.bullet_group.add(bullet)
+            
+            # play shoot sound
             shoot_fx.play()
     
     def AI(this, player, game, level, screen_scroll, bg_scroll, frog = False):
-        
         if this.alive and player.alive:
             
             # when enemy is not idle and 4 gets generated randomly, set enemy to idle and idle counter to 50 
@@ -225,7 +237,6 @@ class Character(po.sprite.Sprite):
                 
                 # update enemy vision rectangle along with movement
                 this.vision.center = (this.rect.centerx + 125 * this.direction, this.rect.centery)
-                # po.draw.rect(game.display, (255, 0, 0), this.vision)
                 
                 # frog jump movement
                 if frog:
@@ -242,10 +253,8 @@ class Character(po.sprite.Sprite):
                     this.idle = False
                     this.idle_counter = 0
                     if player.move_left:
-                        # this.dierection = -1
                         this.move_left = True
                     elif player.move_right:
-                        # this.dierection = 1
                         this.move_right = True    
                 else:    
                     this.move_counter += 1
@@ -280,7 +289,7 @@ class Character(po.sprite.Sprite):
                 # apply knockback
                 player.rect.x += knockback_dir * c.KNOCKBACK_FORCE
                 
-                # # reset jump variables
+                # reset jump variables
                 player.isUp = False
                 player.isDown = False
         else:

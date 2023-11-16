@@ -4,11 +4,10 @@ from characters import Character
 from collectibles import Collectible
 from level import Level
 
+# Initializing pygame and pygame.mixer
 po.init()
 po.mixer.init()
-# po.mixer.music.load('sfx\Final Fantasy 3 - Cute Little Tozas.mp3')
-# po.mixer.music.set_volume(0.05)
-# po.mixer.music.play(-1, 0.0, 3000)
+
 class Game:
     def __init__(this):
         # actual screen 
@@ -23,39 +22,31 @@ class Game:
         # background images
         this.sky = po.image.load('levels\level1\\background_PNGs\sky.png').convert_alpha()
         this.sky_rect = this.sky.get_rect()
-        # this.sky = po.transform.scale(this.sky, (int(this.sky_rect.width * c.SCALE_FACTOR), int(this.sky_rect.height * c.SCALE_FACTOR)))
         this.s_width = this.sky.get_width()
         
         this.mid_front = po.image.load('levels\level1\\background_PNGs\mid_front.png').convert_alpha()
         this.mid_front_rect = this.mid_front.get_rect()
-        # this.mid_front = po.transform.scale(this.mid_front, (int(this.mid_front_rect.width * c.SCALE_FACTOR), int(this.mid_front_rect.height * c.SCALE_FACTOR)))
         this.mf_width = this.mid_front.get_width()
         
         this.mid_back = po.image.load('levels\level1\\background_PNGs\mid_back.png').convert_alpha()
         this.mid_back_rect = this.mid_back.get_rect()
-        # this.mid_back = po.transform.scale(this.mid_back, (int(this.mid_back_rect.width * c.SCALE_FACTOR), int(this.mid_back_rect.height * c.SCALE_FACTOR)))
         this.mb_width = this.mid_back.get_width()
         
         this.props = po.image.load('levels\level1\\background_PNGs\props.png').convert_alpha()
         this.props_rect = this.props.get_rect()
-        # this.props = po.transform.scale(this.props, (int(this.props_rect.width * c.SCALE_FACTOR), int(this.props_rect.height * c.SCALE_FACTOR)))
         
         this.caves_background = po.image.load('levels\level1\\background_PNGs\caves_background.png').convert_alpha()
         this.caves_background_rect = this.caves_background.get_rect()
-        # this.caves_background = po.transform.scale(this.caves_background, (int(this.caves_background_rect.width * c.SCALE_FACTOR), int(this.caves_background_rect.height * c.SCALE_FACTOR)))
 
-    def draw(this, obj, dir = 1):
+    # draw stuff on display surface, then blit display onto main screen..
+    def draw(this, obj, dir = 1): 
         if obj.rect.x < c.SCREEN_WIDTH and obj.rect.x >= 0:
             this.display.blit(po.transform.flip(obj.image, dir, False), obj.rect)
             this.screen.blit(po.transform.scale(this.display, this.screen.get_size()), (0, 0))
-    
-    def menu_background(this):
-        this.display.blit(this.sky, (0, 0))
-        this.display.blit(this.mid_front, (0, 75))
-        this.screen.blit(po.transform.scale(this.display, this.screen.get_size()), (0, 0))
-        
+            
+    # draw background images onto display with slight delay for each image (scroll * (any numeric value, according to need)),
+    # for parallax effect 
     def draw_background(this, scroll):
-        # images repeated for parallax effect
         this.display.blit(this.sky, (0 - (scroll * 0.3), 0))
         this.display.blit(this.sky, (this.s_width - (scroll * 0.3), 0))
         this.display.blit(this.mid_back, (0  - (scroll * 0.5), 0))
@@ -63,10 +54,11 @@ class Game:
         this.display.blit(this.mid_front, (0  - (scroll * 0.7), 0))
         this.display.blit(this.mid_front, (this.mf_width  - (scroll * 0.7), 0))
         
-        # only needed once
+        # these images don't need to be parallaxed
         this.display.blit(this.caves_background, (0 - scroll, 0))
         this.display.blit(this.props, (0 - scroll, 0))
 
+    # load and play background music, and load sound effects
     def music(this):
         po.mixer.music.load('sfx\C418  - Dog - Minecraft Volume Alpha (320kbps).mp3')
         po.mixer.music.set_volume(0.1)
@@ -100,7 +92,8 @@ class HealthBar(Game):
         po.draw.rect(this.game.display, (0, 0, 0), ((this.x - 2) + scroll, (this.y - 2) + scroll, 54, 14))
         po.draw.rect(this.game.display, (255, 0, 0), (this.x + scroll, this.y + scroll, 50, 10))
         po.draw.rect(this.game.display, (0, 255, 0), (this.x + scroll, this.y + scroll, 50 * ratio, 10))
-   
+
+# main function with the main game loop   
 def main():
     # clock for steady fps
     clock = po.time.Clock()
@@ -149,7 +142,6 @@ def main():
     img = po.image.load(f'assets\\bullet sprites\Laser Sprites\\3.png').convert_alpha()
     image = po.transform.scale(img, (int(img.get_width() * bullet_scale), int(img.get_height() * bullet_scale)))
     
-    
     # level and scrolling
     level = Level('levels\level1\\fulldemo.tmx', game.display, player, scale_factor=1.2)
     screen_scroll = 0
@@ -183,17 +175,12 @@ def main():
                     enemy.AI(player, game, level, screen_scroll, background_scroll)
                 enemy.update()
                 game.draw(enemy, enemy.flip)
-                # to draw enemy hitboxes
-                # po.draw.rect(game.display, (0, 0, 255), enemy.rect, 3)
-                
-        # temporary floor
-        # y_cood = 447
-        # po.draw.line(game.display, (255, 0, 0), (0, y_cood), (5120, y_cood))
 
         game.draw(player, player.flip)
         po.draw.rect(game.display, (0, 0, 255), player.rect, 3)
         player.update()
         
+        # player actions performed only when player is alive
         if player.alive:    
             # retrieve the updated screen scroll values from player.move(), 
             # and also allow player to move 
