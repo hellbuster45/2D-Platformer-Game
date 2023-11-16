@@ -1,4 +1,5 @@
 from pygame import sprite
+
 # game variables
 FPS = 75
 GRAVITY = 0.3
@@ -26,3 +27,10 @@ CHAR_HURT = 6
 enemy_group = sprite.Group()
 item_group = sprite.Group()
 bullet_group = sprite.Group()
+
+# menu
+BG_SCALE = 2.5
+PINE_SCALE = 2.5
+PALM_SCALE = 1.57
+BUTTON_SCALE = 0.5
+BOARD_SCALE = 6
